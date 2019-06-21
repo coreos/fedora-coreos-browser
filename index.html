@@ -1,0 +1,244 @@
+<!-- https://github.com/jlebon/fedora-coreos-browser -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+        <title>Fedora CoreOS Build Browser</title>
+    </head>
+    <body>
+        <div id="app">
+            Stream:
+             <select v-model="stream">
+                <option value="testing">testing</option>
+                <option value="testing-devel">testing-devel</option>
+                <option value="bodhi-updates">bodhi-updates</option>
+                <option value="developer">developer</option>
+            </select>
+            <input v-model="developer" v-if="stream == 'developer'">
+            <button v-on:click="refreshBuilds">Refresh</button>
+            <div v-if="loading">
+                Loading...
+            </div>
+            <div v-else-if="builds.length > 0">
+                <div v-for="build in builds">
+                    <hr>
+                    <p>Build: <span style="font-weight: bold">{{ build.id }}</span>
+                        (<a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a>,
+                        <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a>)
+                    </p>
+                    <div v-if="build.meta" style="margin-left: 1em">
+                        <p>OSTree:</p>
+                        <ul>
+                            <li>Timestamp: {{ build.meta['ostree-timestamp'] }}</li>
+                            <li>Commit: {{ build.meta['ostree-commit'] }}
+                                (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
+                                <ul v-if="build.meta.packages">
+                                    <li v-for="pkg in build.meta.packages">
+                                        {{ pkg }}
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <div v-if="build.meta.pkgdiff">
+                                <div v-if="build.meta.pkgdiff.added.length > 0">
+                                    <p>Added:</p>
+                                    <ul>
+                                        <li v-for="pkg in build.meta.pkgdiff.added">
+                                            {{ getPkgNevra(pkg[2]["NewPackage"]) }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div v-if="build.meta.pkgdiff.removed.length > 0">
+                                    <p>Removed:</p>
+                                    <ul>
+                                        <li v-for="pkg in build.meta.pkgdiff.removed">
+                                            {{ getPkgNevra(pkg[2]["PreviousPackage"]) }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div v-if="build.meta.pkgdiff.upgraded.length > 0">
+                                    <p>Upgraded:</p>
+                                    <ul>
+                                        <li v-for="pkg in build.meta.pkgdiff.upgraded">
+                                            {{ pkg[2]["PreviousPackage"][0] }} {{ getPkgEvra(pkg[2]["PreviousPackage"]) }} → {{ getPkgEvra(pkg[2]["NewPackage"]) }}
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div v-if="build.meta.pkgdiff.downgraded.length > 0">
+                                    <p>Downgraded:</p>
+                                    <ul>
+                                        <li v-for="pkg in build.meta.pkgdiff.downgraded">
+                                            {{ pkg[2]["PreviousPackage"][0] }} {{ getPkgEvra(pkg[2]["PreviousPackage"]) }} → {{ getPkgEvra(pkg[2]["NewPackage"]) }}
+                                        </li>
+                                    </ul>
+                                </div>
+                        </div>
+                        <p>Images:</p>
+                        <ul>
+                            <li v-if="'qemu' in build.meta.images">
+                                QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
+                            </li>
+                            <li v-if="'metal-bios' in build.meta.images">
+                                Metal (BIOS): <span v-html="getImageUrl(build, 'metal-bios')"></span>
+                            </li>
+                            <li v-if="'metal-uefi' in build.meta.images">
+                               Metal (UEFI): <span v-html="getImageUrl(build, 'metal-uefi')"></span>
+                            </li>
+                            <li v-if="'iso' in build.meta.images">
+                                Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
+                            </li>
+                            <li v-if="'openstack' in build.meta.images">
+                                OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
+                            </li>
+                            <li v-if="'vmware' in build.meta.images">
+                                VMware: <span v-html="getImageUrl(build, 'vmware')"></span>
+                            </li>
+                            <li v-if="'kernel' in build.meta.images">
+                                Kernel: <span v-html="getImageUrl(build, 'kernel')"></span>
+                            </li>
+                            <li v-if="'initramfs' in build.meta.images">
+                                Initramfs: <span v-html="getImageUrl(build, 'initramfs')"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div v-else style="margin-left: 1em">
+                        loading...
+                    </div>
+                </div>
+            </div>
+            <div v-else>
+                No builds found!
+            </div>
+        </div>
+        <script>
+            //const baseProdUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
+            //const baseDevelUrl = 'https://builds.coreos.fedoraproject.org/devel/streams'
+            const baseProdUrl = 'https://fcos-builds.s3.amazonaws.com/prod/streams'
+            const baseDevelUrl = 'https://fcos-builds.s3.amazonaws.com/devel/streams'
+
+            // pkgdiff enum to str
+            const diffType = ["added", "removed", "upgraded", "downgraded"];
+            const importantPkgs = ["kernel", "systemd", "rpm-ostree"];
+
+            function getBaseUrl(stream, developer) {
+                return stream != "developer"
+                    ? `${baseProdUrl}/${stream}`
+                    : `${baseDevelUrl}/${developer}`;
+            }
+
+            function getArtifactUrl(base, buildid, path) {
+                return `${base}/${buildid}/${path}`;
+            }
+
+            function createArtifactLink(base, buildid, path) {
+                var url = getArtifactUrl(base, buildid, path);
+                return `<a href="${url}">${path}</a>`;
+            }
+
+            function fetchBuilds(base) {
+                return fetch(`${base}/builds.json`)
+                    .then(response => response.ok ? response.json() : {"builds": []})
+                    .then(data => data.builds.map(id => ({'id': id, 'meta': null})));
+            }
+
+            function sortPkgDiff(meta) {
+                if ("pkgdiff" in meta) {
+                    var newdiff = {};
+                    diffType.forEach(t => newdiff[t] = []);
+                    meta["pkgdiff"].forEach(d => newdiff[diffType[d[1]]].push(d));
+                    meta["pkgdiff"] = newdiff;
+                }
+            }
+
+            function findImportantPkgs(commitmeta) {
+                var r = [];
+                commitmeta["rpmostree.rpmdb.pkglist"].forEach(pkg => {
+                    if (importantPkgs.includes(pkg[0])) {
+                        if (pkg[1] != 0) {
+                            r.push(`${pkg[0]}: ${pkg[1]}:${pkg[2]}-${pkg[3]}.${pkg[4]}`);
+                        } else {
+                            r.push(`${pkg[0]}: ${pkg[2]}-${pkg[3]}.${pkg[4]}`);
+                        }
+                    }
+                });
+                return r;
+            }
+
+            function fetchBuildMeta(base, build) {
+                return fetch(`${base}/${build}/meta.json`)
+                    .then(response => response.ok ? response.json() : {});
+            }
+
+            function fetchBuildCommitMeta(base, build) {
+                return fetch(`${base}/${build}/commitmeta.json`)
+                    .then(response => response.ok ? response.json() : {});
+            }
+
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text);
+            }
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    // currently selected stream
+                    stream: 'testing-devel',
+                    // if current stream is "developer", currently entered developer
+                    developer: "",
+                    // current url to builds/ dir for stream
+                    buildsUrl: "",
+                    // list of {id, meta} build objects
+                    builds: [],
+                    // toggles "Loading..."
+                    loading: false
+                },
+                created: function() { this.refreshBuilds() },
+                watch: { stream: 'refreshBuilds' },
+                methods: {
+                    refreshBuilds: function() {
+                        this.loading = true
+                        this.buildsUrl = getBaseUrl(this.stream, this.developer) + "/builds"
+                        fetchBuilds(this.buildsUrl).then(builds => {
+                            // first populate and show the build list
+                            this.builds = builds;
+                            this.loading = false;
+
+                            // and now fetch each build info async
+                            this.builds.forEach(build => {
+                                fetchBuildMeta(this.buildsUrl, build.id).then(meta => {
+                                    sortPkgDiff(meta);
+                                    fetchBuildCommitMeta(this.buildsUrl, build.id).then(commitmeta => {
+                                        meta["packages"] = findImportantPkgs(commitmeta);
+                                        build.meta = meta;
+                                    });
+                                });
+                            })
+                        });
+                    },
+                    getImageUrl: function(build, type) {
+                        var path = build.meta['images'][type]['path'];
+                        var url = getArtifactUrl(this.buildsUrl, build.id, path);
+                        // XXX: clean this up
+                        return `<a href="${url}">${path}</a> (<a onclick="copyToClipboard('${url}')" style="color: blue; text-decoration: underline; cursor: pointer;">copy link</a>)`;
+                    },
+                    getObjectUrl: function(build, path) {
+                        return getArtifactUrl(this.buildsUrl, build.id, path);
+                    },
+                    getObjectLink: function(build, path) {
+                        return createArtifactLink(this.buildsUrl, build.id, path);
+                    },
+                    getPkgNevra: function(tuple) {
+                        return `${tuple[0]}-${tuple[1]}.${tuple[2]}`;
+                    },
+                    getPkgEvra: function(tuple) {
+                        return `${tuple[1]}.${tuple[2]}`;
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
