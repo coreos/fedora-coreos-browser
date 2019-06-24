@@ -28,7 +28,7 @@
                     <hr>
                     <p>Build: <span style="font-weight: bold">{{ build.id }}</span>
                         (<a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a>,
-                        <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a>)
+                         <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a>)
                     </p>
                     <div v-if="build.meta" style="margin-left: 1em">
                         <p>OSTree:</p>
@@ -36,8 +36,10 @@
                             <li>Timestamp: {{ build.meta['ostree-timestamp'] }}</li>
                             <li>Commit: {{ build.meta['ostree-commit'] }}
                                 (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
-                                <ul v-if="build.meta.packages">
-                                    <li v-for="pkg in build.meta.packages">
+                            </li>
+                            <li>Content Checksum: {{ build.meta['ostree-content-checksum'] }}
+                                <ul v-if="build.commitmeta">
+                                    <li v-for="pkg in build.commitmeta.importantPackages">
                                         {{ pkg }}
                                     </li>
                                 </ul>
@@ -142,7 +144,7 @@
             function fetchBuilds(base) {
                 return fetch(`${base}/builds.json`)
                     .then(response => response.ok ? response.json() : {"builds": []})
-                    .then(data => data.builds.map(id => ({'id': id, 'meta': null})));
+                    .then(data => data.builds.map(id => ({'id': id, 'meta': null, 'commitmeta': null})));
             }
 
             function sortPkgDiff(meta) {
@@ -211,9 +213,10 @@
                             this.builds.forEach(build => {
                                 fetchBuildMeta(this.buildsUrl, build.id).then(meta => {
                                     sortPkgDiff(meta);
+                                    build.meta = meta;
                                     fetchBuildCommitMeta(this.buildsUrl, build.id).then(commitmeta => {
-                                        meta["packages"] = findImportantPkgs(commitmeta);
-                                        build.meta = meta;
+                                        commitmeta["importantPackages"] = findImportantPkgs(commitmeta);
+                                        build.commitmeta = commitmeta;
                                     });
                                 });
                             })
