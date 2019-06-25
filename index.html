@@ -7,6 +7,7 @@
         <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
         <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+        <style>a.js {cursor: pointer; color: blue; text-decoration: underline;}</style>
         <title>Fedora CoreOS Build Browser</title>
     </head>
     <body>
@@ -225,8 +226,9 @@
                     getImageUrl: function(build, type) {
                         var path = build.meta['images'][type]['path'];
                         var url = getArtifactUrl(this.buildsUrl, build.id, path);
-                        // XXX: clean this up
-                        return `<a href="${url}">${path}</a> (<a onclick="copyToClipboard('${url}')" style="color: blue; text-decoration: underline; cursor: pointer;">copy link</a>)`;
+                        return `<a href="${url}">${path}</a> ` +
+                            `(<a title="Copy image link to clipboard" class="js"
+                                 onclick="copyToClipboard('${url}')">copy link</a>)`;
                     },
                     getObjectUrl: function(build, path) {
                         return getArtifactUrl(this.buildsUrl, build.id, path);
