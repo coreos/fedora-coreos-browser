@@ -34,7 +34,7 @@
                     <div v-if="build.meta" style="margin-left: 1em">
                         <p>OSTree:</p>
                         <ul>
-                            <li>Timestamp: {{ build.meta['ostree-timestamp'] }}</li>
+                            <li>Timestamp: {{ build.meta['ostree-timestamp'] }} ({{ timeSince(build.meta['ostree-timestamp']) }})</li>
                             <li>Commit: {{ build.meta['ostree-commit'] }}
                                 (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
                             </li>
@@ -250,6 +250,32 @@
                     },
                     getPkgEvra: function(tuple) {
                         return `${tuple[1]}.${tuple[2]}`;
+                    },
+                    // Adapted from https://stackoverflow.com/a/6109105
+                    timeSince: function(rfc3339_timestamp) {
+                        var current = Date.now();
+                        var timestamp = Date.parse(rfc3339_timestamp);
+                        var elapsed = current - timestamp;
+
+                        var msPerMinute = 60 * 1000;
+                        var msPerHour = msPerMinute * 60;
+                        var msPerDay = msPerHour * 24;
+                        var msPerMonth = msPerDay * 30;
+                        var msPerYear = msPerDay * 365;
+
+                        if (elapsed < msPerMinute) {
+                             return Math.floor(elapsed/1000) + ' seconds ago';
+                        } else if (elapsed < msPerHour) {
+                             return Math.floor(elapsed/msPerMinute) + ' minutes ago';
+                        } else if (elapsed < msPerDay) {
+                             return Math.floor(elapsed/msPerHour) + ' hours ago';
+                        } else if (elapsed < msPerMonth) {
+                            return Math.floor(elapsed/msPerDay) + ' days ago';
+                        } else if (elapsed < msPerYear) {
+                            return Math.floor(elapsed/msPerMonth) + ' months ago';
+                        } else {
+                            return Math.floor(elapsed/msPerYear) + ' years ago';
+                        }
                     }
                 }
             })
