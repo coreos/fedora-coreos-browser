@@ -30,11 +30,13 @@
                     <p>Build: <span style="font-weight: bold">{{ build.id }}</span>
                         (<a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a>,
                          <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a>)
+                        — <span v-bind:title="build.meta['coreos-assembler.build-timestamp']">
+                            {{ timeSince(build.meta['coreos-assembler.build-timestamp']) }}
+                          </span>
                     </p>
                     <div v-if="build.meta" style="margin-left: 1em">
                         <p>OSTree:</p>
                         <ul>
-                            <li>Timestamp: {{ build.meta['ostree-timestamp'] }} ({{ timeSince(build.meta['ostree-timestamp']) }})</li>
                             <li>Commit: {{ build.meta['ostree-commit'] }}
                                 (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
                             </li>
