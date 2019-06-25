@@ -38,10 +38,16 @@
                             <li>Commit: {{ build.meta['ostree-commit'] }}
                                 (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
                             </li>
-                            <li>Content Checksum: {{ build.meta['ostree-content-checksum'] }}
-                                <ul v-if="build.commitmeta">
-                                    <li v-for="pkg in build.commitmeta.importantPackages">
-                                        {{ pkg }}
+                            <li>Content Checksum: {{ build.meta['ostree-content-checksum'] }}</li>
+                            <li v-if="build.commitmeta">Packages: (<a class="js" v-on:click="build.commitmeta.showImportantPkgsOnly = !build.commitmeta.showImportantPkgsOnly">{{ build.commitmeta.showImportantPkgsOnly ? "expand" : "collapse" }}</a>)
+                                <ul v-if="build.commitmeta.showImportantPkgsOnly">
+                                    <li v-for="pkg in build.commitmeta.importantPkgs">
+                                        {{ getPkgNevraFull(pkg) }}
+                                    </li>
+                                </ul>
+                                <ul v-else>
+                                    <li v-for="pkg in build.commitmeta['rpmostree.rpmdb.pkglist']">
+                                        {{ getPkgNevraFull(pkg) }}
                                     </li>
                                 </ul>
                             </li>
@@ -161,11 +167,7 @@
                 var r = [];
                 commitmeta["rpmostree.rpmdb.pkglist"].forEach(pkg => {
                     if (importantPkgs.includes(pkg[0])) {
-                        if (pkg[1] != 0) {
-                            r.push(`${pkg[0]}: ${pkg[1]}:${pkg[2]}-${pkg[3]}.${pkg[4]}`);
-                        } else {
-                            r.push(`${pkg[0]}: ${pkg[2]}-${pkg[3]}.${pkg[4]}`);
-                        }
+                        r.push(pkg);
                     }
                 });
                 return r;
@@ -216,7 +218,8 @@
                                     sortPkgDiff(meta);
                                     build.meta = meta;
                                     fetchBuildCommitMeta(this.buildsUrl, build.id).then(commitmeta => {
-                                        commitmeta["importantPackages"] = findImportantPkgs(commitmeta);
+                                        commitmeta["importantPkgs"] = findImportantPkgs(commitmeta);
+                                        commitmeta["showImportantPkgsOnly"] = true;
                                         build.commitmeta = commitmeta;
                                     });
                                 });
@@ -238,6 +241,12 @@
                     },
                     getPkgNevra: function(tuple) {
                         return `${tuple[0]}-${tuple[1]}.${tuple[2]}`;
+                    },
+                    getPkgNevraFull: function(tuple) {
+                        if (tuple[1] != 0) {
+                            return `${tuple[0]}-${tuple[1]}:${tuple[2]}-${tuple[3]}.${tuple[4]}`;
+                        }
+                        return `${tuple[0]}-${tuple[2]}-${tuple[3]}.${tuple[4]}`;
                     },
                     getPkgEvra: function(tuple) {
                         return `${tuple[1]}.${tuple[2]}`;
