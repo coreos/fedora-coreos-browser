@@ -263,18 +263,22 @@
                         var msPerMonth = msPerDay * 30;
                         var msPerYear = msPerDay * 365;
 
+                        function stringize(n, s) {
+                            return n + ` ${s}` + (n == 1 ? "" : "s") + ' ago';
+                        };
+
                         if (elapsed < msPerMinute) {
-                             return Math.floor(elapsed/1000) + ' seconds ago';
+                             return stringize(Math.floor(elapsed/1000), "second");
                         } else if (elapsed < msPerHour) {
-                             return Math.floor(elapsed/msPerMinute) + ' minutes ago';
+                             return stringize(Math.floor(elapsed/msPerMinute), "minute");
                         } else if (elapsed < msPerDay) {
-                             return Math.floor(elapsed/msPerHour) + ' hours ago';
+                             return stringize(Math.floor(elapsed/msPerHour), "hour");
                         } else if (elapsed < msPerMonth) {
-                            return Math.floor(elapsed/msPerDay) + ' days ago';
+                            return stringize(Math.floor(elapsed/msPerDay), "day");
                         } else if (elapsed < msPerYear) {
-                            return Math.floor(elapsed/msPerMonth) + ' months ago';
+                            return stringize(Math.floor(elapsed/msPerMonth), "month");
                         } else {
-                            return Math.floor(elapsed/msPerYear) + ' years ago';
+                            return stringize(Math.floor(elapsed/msPerYear), "year");
                         }
                     }
                 }
