@@ -120,6 +120,15 @@
                         Loading...
                     </div>
                 </div>
+                <div v-if="unshown_builds.length > 0">
+                <hr>
+                <p>
+                    Hiding <span style="font-weight: bold">{{ unshown_builds.length }}</span> older builds
+                    (load <a class="js" v-if="unshown_builds.length > 5" v-on:click="loadMoreBuilds(5)">5</a>
+                          <a class="js" v-if="unshown_builds.length > 10" v-on:click="loadMoreBuilds(10)">10</a>
+                          <a class="js" v-on:click="loadMoreBuilds(-1)">all</a>)
+                </p>
+                </div>
             </div>
             <div v-else>
                 No builds found!
@@ -128,6 +137,8 @@
         <script>
             const baseProdUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
             const baseDevelUrl = 'https://builds.coreos.fedoraproject.org/devel/streams'
+
+            const initialBuildsShown = 5;
 
             // pkgdiff enum to str
             const diffType = ["added", "removed", "upgraded", "downgraded"];
@@ -173,13 +184,27 @@
                 return r;
             }
 
-            function fetchBuildMeta(base, build) {
-                return fetch(`${base}/${build}/meta.json`)
+            function fetchBuild(base, build) {
+                fetchBuildMeta(base, build.id).then(meta => {
+                    sortPkgDiff(meta);
+                    // show the build metadata
+                    build.meta = meta;
+                    // and fetch extra commit metadata in async
+                    fetchBuildCommitMeta(base, build.id).then(commitmeta => {
+                        commitmeta["importantPkgs"] = findImportantPkgs(commitmeta);
+                        commitmeta["showImportantPkgsOnly"] = true;
+                        build.commitmeta = commitmeta;
+                    });
+                });
+            }
+
+            function fetchBuildMeta(base, buildid) {
+                return fetch(`${base}/${buildid}/meta.json`)
                     .then(response => response.ok ? response.json() : {});
             }
 
-            function fetchBuildCommitMeta(base, build) {
-                return fetch(`${base}/${build}/commitmeta.json`)
+            function fetchBuildCommitMeta(base, buildid) {
+                return fetch(`${base}/${buildid}/commitmeta.json`)
                     .then(response => response.ok ? response.json() : {});
             }
 
@@ -196,8 +221,10 @@
                     developer: "",
                     // current url to builds/ dir for stream
                     buildsUrl: "",
-                    // list of {id, meta} build objects
+                    // list of {id, meta, commitmeta} build objects
                     builds: [],
+                    // list of unshown {id, meta, commitmeta} build objects
+                    unshown_builds: [],
                     // toggles "Loading..."
                     loading: false
                 },
@@ -209,22 +236,32 @@
                         this.buildsUrl = getBaseUrl(this.stream, this.developer) + "/builds"
                         fetchBuilds(this.buildsUrl).then(builds => {
                             // first populate and show the build list
-                            this.builds = builds;
                             this.loading = false;
+                            this.builds = [];
+                            this.unshown_builds = [];
 
                             // and now fetch each build info async
-                            this.builds.forEach(build => {
-                                fetchBuildMeta(this.buildsUrl, build.id).then(meta => {
-                                    sortPkgDiff(meta);
-                                    build.meta = meta;
-                                    fetchBuildCommitMeta(this.buildsUrl, build.id).then(commitmeta => {
-                                        commitmeta["importantPkgs"] = findImportantPkgs(commitmeta);
-                                        commitmeta["showImportantPkgsOnly"] = true;
-                                        build.commitmeta = commitmeta;
-                                    });
-                                });
+                            builds.forEach((build, idx) => {
+                                if (idx < initialBuildsShown) {
+                                    this.builds.push(build);
+                                    fetchBuild(this.buildsUrl, build);
+                                } else {
+                                    this.unshown_builds.push(build);
+                                }
                             })
                         });
+                    },
+                    loadMoreBuilds: function(n) {
+                        var unshown_builds = this.unshown_builds;
+                        this.unshown_builds = []
+                        unshown_builds.forEach((build, idx) => {
+                            if (n < 0 || idx < n) {
+                                this.builds.push(build);
+                                fetchBuild(this.buildsUrl, build);
+                            } else {
+                                this.unshown_builds.push(build);
+                            }
+                        })
                     },
                     getImageUrl: function(build, type) {
                         var path = build.meta['images'][type]['path'];
