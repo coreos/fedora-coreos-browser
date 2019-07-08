@@ -93,11 +93,8 @@
                             <li v-if="'qemu' in build.meta.images">
                                 QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
                             </li>
-                            <li v-if="'metal-bios' in build.meta.images">
-                                Metal (BIOS): <span v-html="getImageUrl(build, 'metal-bios')"></span>
-                            </li>
-                            <li v-if="'metal-uefi' in build.meta.images">
-                               Metal (UEFI): <span v-html="getImageUrl(build, 'metal-uefi')"></span>
+                            <li v-if="'metal' in build.meta.images">
+                                Bare Metal: <span v-html="getImageUrl(build, 'metal')"></span>
                             </li>
                             <li v-if="'iso' in build.meta.images">
                                 Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
