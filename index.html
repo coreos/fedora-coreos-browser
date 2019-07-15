@@ -112,6 +112,14 @@
                                 Initramfs: <span v-html="getImageUrl(build, 'initramfs')"></span>
                             </li>
                         </ul>
+                        <div v-if="'amis' in build.meta">
+                            <p>AMIs:</p>
+                            <ul>
+                                <li v-for="ami in build.meta.amis">
+                                    {{ ami["name"] }}: {{ ami["hvm"] }}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     <div v-else style="margin-left: 1em">
                         Loading...
