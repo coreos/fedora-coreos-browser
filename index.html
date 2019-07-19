@@ -40,7 +40,9 @@
                             <li>Commit: {{ build.meta['ostree-commit'] }}
                                 (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
                             </li>
-                            <li>Content Checksum: {{ build.meta['ostree-content-checksum'] }}</li>
+                            <li v-if="build.meta['fedora-coreos.parent-commit']">
+                                Parent Commit: {{ build.meta['fedora-coreos.parent-commit'] }} ({{ build.meta['fedora-coreos.parent-version'] }})
+                            </li>
                             <li v-if="build.commitmeta">Packages: (<a class="js" v-on:click="build.commitmeta.showImportantPkgsOnly = !build.commitmeta.showImportantPkgsOnly">{{ build.commitmeta.showImportantPkgsOnly ? "expand" : "collapse" }}</a>)
                                 <ul v-if="build.commitmeta.showImportantPkgsOnly">
                                     <li v-for="pkg in build.commitmeta.importantPkgs">
