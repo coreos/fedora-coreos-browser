@@ -38,7 +38,7 @@
                         <p>OSTree:</p>
                         <ul>
                             <li>Commit: {{ build.meta['ostree-commit'] }}
-                                (<a v-bind:href="getObjectUrl(build, 'ostree-commit.tar')">download</a>)
+                                (<a v-bind:href="getOSTreeUrl(build)">download</a>)
                             </li>
                             <li v-if="build.meta['fedora-coreos.parent-commit']">
                                 Parent Commit: {{ build.meta['fedora-coreos.parent-commit'] }} ({{ build.meta['fedora-coreos.parent-version'] }})
@@ -324,6 +324,13 @@
                     },
                     getObjectUrl: function(build, path) {
                         return getArtifactUrl(this.buildsUrl, build, path, this.legacy);
+                    },
+                    getOSTreeUrl: function(build) {
+                        if ('ostree' in build.meta['images']) {
+                            var path = build.meta['images']['ostree']['path'];
+                            return getArtifactUrl(this.buildsUrl, build, path, this.legacy)
+                        }
+                        return this.getObjectUrl(build, "ostree-commit.tar")
                     },
                     getObjectLink: function(build, path) {
                         return createArtifactLink(this.buildsUrl, build, path, this.legacy);
