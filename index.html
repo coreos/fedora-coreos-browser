@@ -98,9 +98,6 @@
                             <li v-if="'metal' in build.meta.images">
                                 Bare Metal: <span v-html="getImageUrl(build, 'metal')"></span>
                             </li>
-                            <li v-if="'iso' in build.meta.images">
-                                Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
-                            </li>
                             <li v-if="'aws' in build.meta.images">
                                 AWS: <span v-html="getImageUrl(build, 'aws')"></span>
                             </li>
@@ -110,11 +107,23 @@
                             <li v-if="'vmware' in build.meta.images">
                                 VMware: <span v-html="getImageUrl(build, 'vmware')"></span>
                             </li>
+                            <li v-if="'iso' in build.meta.images">
+                                Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
+                            </li>
                             <li v-if="'kernel' in build.meta.images">
-                                Kernel: <span v-html="getImageUrl(build, 'kernel')"></span>
+                                Installer Kernel: <span v-html="getImageUrl(build, 'kernel')"></span>
                             </li>
                             <li v-if="'initramfs' in build.meta.images">
-                                Initramfs: <span v-html="getImageUrl(build, 'initramfs')"></span>
+                                Installer Initramfs: <span v-html="getImageUrl(build, 'initramfs')"></span>
+                            </li>
+                            <li v-if="'live-iso' in build.meta.images">
+                                Live ISO: <span v-html="getImageUrl(build, 'live-iso')"></span>
+                            </li>
+                            <li v-if="'live-kernel' in build.meta.images">
+                                Live Kernel: <span v-html="getImageUrl(build, 'live-kernel')"></span>
+                            </li>
+                            <li v-if="'live-initramfs' in build.meta.images">
+                                Live Initramfs: <span v-html="getImageUrl(build, 'live-initramfs')"></span>
                             </li>
                         </ul>
                         <div v-if="'amis' in build.meta">
