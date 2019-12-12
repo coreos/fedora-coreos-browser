@@ -101,6 +101,9 @@
                             <li v-if="'aws' in build.meta.images">
                                 AWS: <span v-html="getImageUrl(build, 'aws')"></span>
                             </li>
+                            <li v-if="'azure' in build.meta.images">
+                                Azure: <span v-html="getImageUrl(build, 'azure')"></span>
+                            </li>
                             <li v-if="'openstack' in build.meta.images">
                                 OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
                             </li>
