@@ -92,11 +92,8 @@
                         </div>
                         <p>Images:</p>
                         <ul>
-                            <li v-if="'qemu' in build.meta.images">
-                                QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
-                            </li>
-                            <li v-if="'metal' in build.meta.images">
-                                Bare Metal: <span v-html="getImageUrl(build, 'metal')"></span>
+                            <li v-if="'aliyun' in build.meta.images">
+                                Aliyun (Alibaba Cloud): <span v-html="getImageUrl(build, 'aliyun')"></span>
                             </li>
                             <li v-if="'aws' in build.meta.images">
                                 AWS: <span v-html="getImageUrl(build, 'aws')"></span>
@@ -104,11 +101,11 @@
                             <li v-if="'azure' in build.meta.images">
                                 Azure: <span v-html="getImageUrl(build, 'azure')"></span>
                             </li>
-                            <li v-if="'openstack' in build.meta.images">
-                                OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
+                            <li v-if="'metal' in build.meta.images">
+                                Bare Metal: <span v-html="getImageUrl(build, 'metal')"></span>
                             </li>
-                            <li v-if="'vmware' in build.meta.images">
-                                VMware: <span v-html="getImageUrl(build, 'vmware')"></span>
+                            <li v-if="'gcp' in build.meta.images">
+                                GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
                             </li>
                             <li v-if="'iso' in build.meta.images">
                                 Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
@@ -128,11 +125,14 @@
                             <li v-if="'live-initramfs' in build.meta.images">
                                 Live Initramfs: <span v-html="getImageUrl(build, 'live-initramfs')"></span>
                             </li>
-                            <li v-if="'gcp' in build.meta.images">
-                                GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
+                            <li v-if="'openstack' in build.meta.images">
+                                OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
                             </li>
-                            <li v-if="'aliyun' in build.meta.images">
-                                Aliyun (Alibaba Cloud): <span v-html="getImageUrl(build, 'aliyun')"></span>
+                            <li v-if="'qemu' in build.meta.images">
+                                QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
+                            </li>
+                            <li v-if="'vmware' in build.meta.images">
+                                VMware: <span v-html="getImageUrl(build, 'vmware')"></span>
                             </li>
                         </ul>
                         <div v-if="'amis' in build.meta">
