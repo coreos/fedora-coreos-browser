@@ -128,6 +128,12 @@
                             <li v-if="'live-initramfs' in build.meta.images">
                                 Live Initramfs: <span v-html="getImageUrl(build, 'live-initramfs')"></span>
                             </li>
+                            <li v-if="'gcp' in build.meta.images">
+                                GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
+                            </li>
+                            <li v-if="'aliyun' in build.meta.images">
+                                Aliyun (Alibaba Cloud): <span v-html="getImageUrl(build, 'aliyun')"></span>
+                            </li>
                         </ul>
                         <div v-if="'amis' in build.meta">
                             <p>AMIs:</p>
