@@ -116,6 +116,9 @@
                             <li v-if="'metal4k' in build.meta.images">
                                 Bare Metal (4k Native): <span v-html="getImageUrl(build, 'metal4k')"></span>
                             </li>
+                            <li v-if="'exoscale' in build.meta.images">
+                                Exoscale: <span v-html="getImageUrl(build, 'exoscale')"></span>
+                            </li>
                             <li v-if="'gcp' in build.meta.images">
                                 GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
                             </li>
