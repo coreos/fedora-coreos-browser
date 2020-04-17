@@ -320,8 +320,8 @@
                             this.stream = queryStream;
                         } else {
                             searchParams.set('stream', this.stream);
+                            history.replaceState(null, null, `${window.location.origin + window.location.pathname}?${searchParams.toString()}`);
                         }
-                        history.replaceState(null, null, `${window.location.origin}?${searchParams.toString()}`);
                     }
 
                     this.refreshBuilds();
@@ -334,7 +334,7 @@
                 },
                 methods: {
                     updateURL: function() {
-                        history.pushState(null, null, `${window.location.origin}?stream=${this.stream}`);
+                        history.pushState(null, null, `${window.location.origin + window.location.pathname}?stream=${this.stream}`);
                     },
                     refreshBuilds: function() {
                         this.loading = true
