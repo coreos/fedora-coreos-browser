@@ -316,7 +316,17 @@
                     // toggles "Loading..."
                     loading: false
                 },
-                created: function() { this.refreshBuilds() },
+                created: function() {
+                    const searchParams = new URLSearchParams(window.location.search);
+                    if (searchParams.has('stream')) {
+                        const queryStream = searchParams.get('stream');
+                        if (["stable", "testing", "next", "testing-devel", "next-devel", "bodhi-updates", "developer"].includes(queryStream)) {
+                            this.stream = queryStream;
+                        }
+                    }
+
+                    this.refreshBuilds();
+                    },
                 watch: { stream: 'refreshBuilds' },
                 methods: {
                     refreshBuilds: function() {
