@@ -21,14 +21,8 @@
             </p>
             <hr>
             Stream:
-             <select v-model="stream">
-                <option value="stable">stable</option>
-                <option value="testing">testing</option>
-                <option value="next">next</option>
-                <option value="testing-devel">testing-devel</option>
-                <option value="next-devel">next-devel</option>
-                <option value="bodhi-updates">bodhi-updates</option>
-                <option value="developer">developer</option>
+            <select v-model="stream">
+                <option v-for="streamItem in streamList" :value="streamItem">{{ streamItem }}</option>
             </select>
             <input v-model="developer" v-if="stream == 'developer'">
             <button v-on:click="refreshBuilds">Refresh</button>
@@ -297,6 +291,8 @@
             var app = new Vue({
                 el: '#app',
                 data: {
+                    // source of truth for streams
+                    streamList: ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'bodhi-updates', 'developer'],
                     // currently selected stream
                     stream: 'testing-devel',
                     // if current stream is "developer", currently entered developer
@@ -320,7 +316,7 @@
                     const searchParams = new URLSearchParams(window.location.search);
                     if (searchParams.has('stream')) {
                         const queryStream = searchParams.get('stream');
-                        if (["stable", "testing", "next", "testing-devel", "next-devel", "bodhi-updates", "developer"].includes(queryStream)) {
+                        if (this.streamList.includes(queryStream)) {
                             this.stream = queryStream;
                         }
                     }
