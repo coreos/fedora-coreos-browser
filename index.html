@@ -313,18 +313,29 @@
                     loading: false
                 },
                 created: function() {
-                    const searchParams = new URLSearchParams(window.location.search);
+                    let searchParams = new URLSearchParams(window.location.search);
                     if (searchParams.has('stream')) {
                         const queryStream = searchParams.get('stream');
                         if (this.streamList.includes(queryStream)) {
                             this.stream = queryStream;
+                        } else {
+                            searchParams.set('stream', this.stream);
                         }
+                        history.replaceState(null, null, `${window.location.origin}?${searchParams.toString()}`);
                     }
 
                     this.refreshBuilds();
                     },
-                watch: { stream: 'refreshBuilds' },
+                watch: {
+                    stream() {
+                        this.updateURL();
+                        this.refreshBuilds();
+                    }
+                },
                 methods: {
+                    updateURL: function() {
+                        history.pushState(null, null, `${window.location.origin}?stream=${this.stream}`);
+                    },
                     refreshBuilds: function() {
                         this.loading = true
                         this.buildsUrl = getBaseUrl(this.stream, this.developer) + "/builds"
