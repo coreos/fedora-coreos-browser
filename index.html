@@ -334,7 +334,7 @@
                 },
                 methods: {
                     updateURL: function() {
-                        history.pushState(null, null, `${window.location.origin + window.location.pathname}?stream=${this.stream}`);
+                        history.replaceState(null, null, `${window.location.origin + window.location.pathname}?stream=${this.stream}`);
                     },
                     refreshBuilds: function() {
                         this.loading = true
