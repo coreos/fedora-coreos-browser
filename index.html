@@ -139,6 +139,9 @@
                             <li v-if="'live-initramfs' in build.meta.images">
                                 Live Initramfs: <span v-html="getImageUrl(build, 'live-initramfs')"></span>
                             </li>
+                            <li v-if="'live-rootfs' in build.meta.images">
+                                Live Rootfs: <span v-html="getImageUrl(build, 'live-rootfs')"></span>
+                            </li>
                             <li v-if="'openstack' in build.meta.images">
                                 OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
                             </li>
