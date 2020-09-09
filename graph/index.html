@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fedora CoreOS updates graph</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+    <script src="https://dagrejs.github.io/project/dagre-d3/v0.6.4/dagre-d3.js" charset="utf-8"></script>
+
+    <script>
+
+function zeroStream() {
+  return {
+    "nodes": 0,
+    "edges": 0,
+    "barriers": 0,
+    "deadends": 0,
+    "rollouts": 0
+  };
+}
+
+    var pageGraph = new dagreD3.graphlib.Graph().setGraph({"rankdir": "LR"});
+    var pageInfra = "";
+    var pageStream = "";
+    var pageArch = "";
+    var pageStreamDetails = zeroStream();
+    </script>
+
+  <style id="css">
+.node rect {
+  stroke: #333;
+  fill: #fff;
+}
+
+.barrier rect {
+  fill: hsl(204, 71%, 53%);
+}
+
+.deadend rect {
+  fill: hsl(348, 86%, 61%);
+}
+
+.rollout rect {
+  fill: hsl(171, 100%, 41%);
+}
+
+.edgePath path {
+  stroke: #333;
+  fill: #333;
+  stroke-width: 1.5px;
+}
+  </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="."><img src="https://getfedora.org/static/images/fedora-coreos-logo.png"/></a>
+  </div>
+
+  <div class="navbar-end">
+    <div class="navbar-item has-dropdown is-hoverable">
+      <a class="navbar-link">Stream</a>
+      <div class="navbar-dropdown">
+        <a class="navbar-item">Stable</a>
+        <a class="navbar-item">Testing</a>
+      </div>
+    </div>
+    <div class="navbar-item has-dropdown is-hoverable">
+      <a class="navbar-link">Architecture</a>
+      <div class="navbar-dropdown">
+        <a class="navbar-item">x86_64</a>
+      </div>
+    </div>
+    <div class="navbar-item has-dropdown is-hoverable">
+      <a class="navbar-link">Infrastructure</a>
+      <div class="navbar-dropdown">
+        <a class="navbar-item">Production</a>
+        <a class="navbar-item">Staging</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main content -->
+<section class="section">
+  <div class="container">
+    <div class="columns">
+      <div class="column is-three-quarters">
+        <nav class="tile is-ancestor is-parent">
+        <nav class="panel is-info">
+          <p class="panel-heading has-text-centered">Updates graph</p>
+          <div class="panel-block">
+          <svg width="100%" id="svg-box">
+            <g id="svg-graph"/>
+          </svg>
+          </div>
+        </nav>
+        </nav>
+      </div>
+      <div class="column is-one-quarter">
+        <nav class="tile is-ancestor is-parent is-vertical">
+          <div class="tile is-vertical is-12 is-child">
+            <nav class="panel is-danger">
+              <p class="panel-heading has-text-centered">Stream details</p>
+              <div class="panel-block">
+               <ul>
+                <li>Stream: <b id="stream-name">-</b></li>
+                <li>Architecture: <b id="stream-arch">-</b></li>
+                <li>Source: <b id="stream-source">-</b></li>
+
+                <hr/>
+
+                <li>Nodes: <b id="stream-nodes">-</b></li>
+                <li>Edges: <b id="stream-edges">-</b></li>
+                <li>Barriers: <b id="stream-barriers">-</b></li>
+                <li>Deadends: <b id="stream-deadends">-</b></li>
+                <li>Rollouts: <b id="stream-rollouts">-</b></li>
+               </ul>
+              </div>
+            </nav>
+          </div>
+          <div class="tile is-vertical is-12 is-child">
+            <nav class="panel is-danger">
+              <p class="panel-heading has-text-centered">Release details</p>
+              <div class="panel-block">
+<ul>
+                <li>Version: <b id="release-version">-</b></li>
+                <li>Age index: <b id="release-age-index">-</b></li>
+<hr/>
+                <li>Barrier: <b id="release-barrier">-</b></li>
+                <li>Deadend: <b id="release-deadend">-</b></li>
+                <li>Rollout: <b id="release-rollout">-</b></li>
+</div>
+            </nav>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</body>
+
+<script id="js">
+// Return Cincinnati URL.
+function templateUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  var basearch = urlParams.get('basearch');
+  if (basearch === null) {
+    basearch = "x86_64";
+  }
+  pageArch = basearch;
+
+  var stream = urlParams.get('stream');
+  if (stream === null) {
+    stream = "stable";
+  }
+  pageStream = stream;
+
+  var infra = urlParams.get('infra');
+  if (infra === null || infra === "prod") {
+    infra = "prod"
+    infraPrefix = "";
+  } else if (infra === "staging") {
+    infraPrefix = "stg.";
+  }
+  pageInfra = infra;
+
+  const updatesUrl = `https://raw-updates.coreos.${infraPrefix}fedoraproject.org/v1/graph?basearch=${basearch}&stream=${stream}`;
+  return updatesUrl;
+}
+
+// Add all nodes.
+function addNodes(graph, updates) {
+  updates["nodes"].forEach(function(node) {
+    pageStreamDetails["nodes"] += 1;
+    var kind = "common"
+    const index = node["metadata"]["org.fedoraproject.coreos.releases.age_index"];
+    const version = node["version"];
+    if (node["metadata"]["org.fedoraproject.coreos.updates.deadend"] === "true") {
+      kind += " deadend";
+      pageStreamDetails["deadends"] += 1;
+    };
+    if (node["metadata"]["org.fedoraproject.coreos.updates.barrier"] === "true") {
+      kind += " barrier";
+      pageStreamDetails["barriers"] += 1;
+    };
+    if (node["metadata"]["org.fedoraproject.coreos.updates.rollout"] === "true") {
+      kind += " rollout";
+      pageStreamDetails["rollouts"] += 1;
+    };
+    const props = {
+      "label": version,
+      "class": kind,
+    };
+    graph.setNode(index, props);
+    var nodeBox = graph.node(index);
+    nodeBox.rx = nodeBox.ry = 5;
+  });
+  return updates;
+}
+
+
+// Add all edges.
+function addEdges(graph, updates) {
+  updates["edges"].forEach(function(edge) {
+    graph.setEdge(edge[0], edge[1], {});
+    pageStreamDetails["edges"] += 1;
+  });
+  return updates;
+}
+
+// Render graph.
+function renderGraph(graph) {
+  var svg = d3.select("svg");
+  var inner = svg.select("g");
+  var render = new dagreD3.render();
+  render(inner, graph);
+
+  // Compute scale.
+  var boxWidth = document.getElementById("svg-box").clientWidth;
+  var graphWidth = graph.graph().width;
+  var scale = boxWidth / graph.graph().width;
+  var newHeight = (graph.graph().height * scale) + 40;
+  svg.attr("height", newHeight);
+
+  // Set up zoom support.
+  var zoom = d3.zoom().on("zoom", function() {
+    inner.attr("transform", d3.event.transform);
+  });
+  svg.call(zoom);
+
+  let transform = d3.zoomIdentity.scale(scale);
+  svg.call(zoom.transform, transform);
+}
+
+fetch(templateUrl())
+  .then(data => { zeroStream(); pageGraph = new dagreD3.graphlib.Graph().setGraph({"rankdir": "LR"}); return data.json() } )
+  .then(updates => addNodes(pageGraph, updates))
+  .then(updates => addEdges(pageGraph, updates))
+  .then(updates => renderGraph(pageGraph))
+  .then(updates => updateStreamDetails(pageGraph))
+  .catch(error => console.error(error));
+
+function updateStreamDetails(graph) {
+   var streamName = document.getElementById("stream-name");
+   streamName.innerHTML = pageStream;
+   var streamArch = document.getElementById("stream-arch");
+   streamArch.innerHTML = pageArch;
+   var streamSource = document.getElementById("stream-source");
+   streamSource.innerHTML = `Cincinnati (${pageInfra})`;
+   var streamNodes = document.getElementById("stream-nodes");
+   streamNodes.innerHTML = pageStreamDetails["nodes"];
+   var streamEdges = document.getElementById("stream-edges");
+   streamEdges.innerHTML = pageStreamDetails["edges"];
+   var streamBarriers = document.getElementById("stream-barriers");
+   streamBarriers.innerHTML = pageStreamDetails["barriers"];
+   var streamDeadends = document.getElementById("stream-deadends");
+   streamDeadends.innerHTML = pageStreamDetails["deadends"];
+   var streamRollouts = document.getElementById("stream-rollouts");
+   streamRollouts.innerHTML = pageStreamDetails["rollouts"];
+}
+
+</script>
+
+</html>
