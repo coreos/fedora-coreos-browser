@@ -121,6 +121,9 @@
                             <li v-if="'gcp' in build.meta.images">
                                 GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
                             </li>
+                            <li v-if="'ibmcloud' in build.meta.images">
+                                IBM Cloud: <span v-html="getImageUrl(build, 'ibmcloud')"></span>
+                            </li>
                             <li v-if="'iso' in build.meta.images">
                                 Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
                             </li>
