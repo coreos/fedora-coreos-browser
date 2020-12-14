@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Fedora CoreOS updates graph</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
-    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.15.1/js/all.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js" charset="utf-8"></script>
     <script src="https://dagrejs.github.io/project/dagre-d3/v0.6.4/dagre-d3.js" charset="utf-8"></script>
 
     <script>
@@ -91,7 +91,6 @@ function zeroStream() {
   <div class="container">
     <div class="columns">
       <div class="column is-three-quarters">
-        <nav class="tile is-ancestor is-parent">
         <nav class="panel is-info">
           <p class="panel-heading has-text-centered">Updates graph</p>
           <div class="panel-block">
@@ -99,7 +98,6 @@ function zeroStream() {
             <g id="svg-graph"/>
           </svg>
           </div>
-        </nav>
         </nav>
       </div>
       <div class="column is-one-quarter">
