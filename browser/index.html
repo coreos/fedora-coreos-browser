@@ -154,6 +154,9 @@
                             <li v-if="'vmware' in build.meta.images">
                                 VMware: <span v-html="getImageUrl(build, 'vmware')"></span>
                             </li>
+                            <li v-if="'vultr' in build.meta.images">
+                                Vultr: <span v-html="getImageUrl(build, 'vultr')"></span>
+                            </li>
                         </ul>
                         <div v-if="'amis' in build.meta">
                             <p>AMIs:</p>
