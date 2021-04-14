@@ -101,6 +101,32 @@
                                                         </ul>
                                                     </div>
                                             </div>
+                                            <div v-if="build.meta['advisories-diff']" class="content">
+                                                SecAdvisories:
+                                                <ul>
+                                                    <li v-for="adv in build.meta['advisories-diff']">
+                                                        <span v-html="createAdvisoryUrl(adv[0])"></span> <span v-if="adv[2] > 0">({{ advisorySeverityType[adv[2]] }} severity)</span>
+                                                        <ul>
+                                                            <li>
+                                                                Packages:
+                                                                <ul>
+                                                                    <li v-for="pkg in adv[3]">
+                                                                        {{ pkg }}
+                                                                    </li>
+                                                                </ul>
+                                                            </li>
+                                                            <li v-if="'cve_references' in adv[4] && adv[4]['cve_references'].length > 0">
+                                                                CVEs:
+                                                                <ul>
+                                                                    <li v-for="cve in adv[4]['cve_references']">
+                                                                        <span v-html="createCveUrl(cve)"></span>
+                                                                    </li>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                             <div class="content">
                                                 Images:
                                                 <ul>
@@ -257,10 +283,21 @@
             const diffType = ["added", "removed", "upgraded", "downgraded"];
             const importantPkgs = ["kernel", "systemd", "rpm-ostree", "ignition", "podman", "moby-engine"];
 
+            // RpmOstreeAdvisorySeverity enum to str
+            const advisorySeverityType = ["none", "low", "moderate", "important", "critical"];
+
             function getBaseUrl(stream, developer) {
                 return stream != "developer"
                     ? `${baseProdUrl}/${stream}`
                     : `${baseDevelUrl}/${developer}`;
+            }
+
+            function createAdvisoryUrl(id) {
+                return `<a href="https://bodhi.fedoraproject.org/updates/${id}">${id}</a>`;
+            }
+
+            function createCveUrl(cve) {
+                return `<a href="${cve[0]}">${cve[1]}</a>`;
             }
 
             function getArtifactUrl(base, build, path, legacy) {
