@@ -101,7 +101,7 @@
                                                         </ul>
                                                     </div>
                                             </div>
-                                            <div v-if="build.meta['advisories-diff']" class="content">
+                                            <div v-if="'advisories-diff' in build.meta && build.meta['advisories-diff'].length > 0" class="content">
                                                 SecAdvisories:
                                                 <ul>
                                                     <li v-for="adv in build.meta['advisories-diff']">
