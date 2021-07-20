@@ -146,6 +146,9 @@
                                                     <li v-if="'azure' in build.meta.images">
                                                         Azure: <span v-html="getImageUrl(build, 'azure')"></span>
                                                     </li>
+                                                    <li v-if="'azurestack' in build.meta.images">
+                                                        Azure Stack: <span v-html="getImageUrl(build, 'azurestack')"></span>
+                                                    </li>
                                                     <li v-if="'metal' in build.meta.images">
                                                         Bare Metal: <span v-html="getImageUrl(build, 'metal')"></span>
                                                     </li>
