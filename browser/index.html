@@ -202,6 +202,14 @@
                                                     </li>
                                                 </ul>
                                             </div>
+                                            <div v-if="'aliyun' in build.meta" class="content">
+                                                Aliyun (Alibaba Cloud) Images:
+                                                <ul>
+                                                    <li v-for="image in build.meta.aliyun">
+                                                        {{ image["name"] }}: {{ image["id"] }}
+                                                    </li>
+                                                </ul>
+                                            </div>
                                             <div v-if="'amis' in build.meta" class="content">
                                                 AMIs:
                                                 <ul>
