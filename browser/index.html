@@ -327,11 +327,6 @@
                 return `${base}/${build.id}/${build.arches[0]}/${path}`;
             }
 
-            function createArtifactLink(base, build, path, legacy) {
-                var url = getArtifactUrl(base, build, path, legacy);
-                return `<a href="${url}">${path}</a>`;
-            }
-
             function fetchBuilds(base) {
                 return fetch(`${base}/builds.json`)
                     .then(response => response.ok ? response.json() : {"builds": []})
@@ -505,9 +500,6 @@
                             return getArtifactUrl(this.buildsUrl, build, path, this.legacy)
                         }
                         return this.getObjectUrl(build, "ostree-commit.tar")
-                    },
-                    getObjectLink: function(build, path) {
-                        return createArtifactLink(this.buildsUrl, build, path, this.legacy);
                     },
                     getPkgNevra: function(tuple) {
                         return `${tuple[0]}-${tuple[1]}.${tuple[2]}`;
