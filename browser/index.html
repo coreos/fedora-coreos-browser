@@ -37,8 +37,6 @@
                                     <div v-for="build in builds">
                                         <div class="content">
                                             Version: <span style="font-weight: bold">{{ build.id }}</span>
-                                            (<a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a>,
-                                            <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a>)
                                             <span v-if="build.meta" v-bind:title="build.meta['coreos-assembler.build-timestamp']">
                                                 — {{ timeSince(build.meta['coreos-assembler.build-timestamp']) }}
                                             </span>
@@ -49,6 +47,7 @@
                                                 <ul>
                                                     <li> FCOS Commit: <a v-bind:href="'https://github.com/coreos/fedora-coreos-config/commit/' + build.meta['coreos-assembler.config-gitrev']">{{ build.meta['coreos-assembler.config-gitrev'] }}</a></li>
                                                     <li> COSA Commit: <a v-bind:href="'https://github.com/coreos/coreos-assembler/commit/' + build.meta['coreos-assembler.container-image-git']['commit']">{{ build.meta['coreos-assembler.container-image-git']['commit'] }}</a></li>
+                                                    <li> Raw: <a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a> <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a></li>
                                                 </ul>
                                             </div>
                                             <div class="content">
