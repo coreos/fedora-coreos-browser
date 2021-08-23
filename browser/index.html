@@ -37,8 +37,6 @@
                                     <div v-for="build in builds">
                                         <div class="content">
                                             Version: <span style="font-weight: bold">{{ build.id }}</span>
-                                            (<a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a>,
-                                            <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a>)
                                             <span v-if="build.meta" v-bind:title="build.meta['coreos-assembler.build-timestamp']">
                                                 — {{ timeSince(build.meta['coreos-assembler.build-timestamp']) }}
                                             </span>
@@ -49,6 +47,7 @@
                                                 <ul>
                                                     <li> FCOS Commit: <a v-bind:href="'https://github.com/coreos/fedora-coreos-config/commit/' + build.meta['coreos-assembler.config-gitrev']">{{ build.meta['coreos-assembler.config-gitrev'] }}</a></li>
                                                     <li> COSA Commit: <a v-bind:href="'https://github.com/coreos/coreos-assembler/commit/' + build.meta['coreos-assembler.container-image-git']['commit']">{{ build.meta['coreos-assembler.container-image-git']['commit'] }}</a></li>
+                                                    <li> Raw: <a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a> <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a></li>
                                                 </ul>
                                             </div>
                                             <div class="content">
@@ -220,8 +219,17 @@
                                             </div>
                                             <hr>
                                         </div>
+                                        <div v-else-if="!build.arches.includes(arch)" style="margin-left: 1em">
+                                            <div class="content">
+                                                Not available on architecture {{ arch }}.
+                                            </div>
+                                            <hr>
+                                        </div>
                                         <div v-else style="margin-left: 1em">
-                                            Loading...
+                                            <div class="content">
+                                                Loading...
+                                            </div>
+                                            <hr>
                                         </div>
                                     </div>
                                     <div v-if="unshown_builds.length > 0">
@@ -278,6 +286,23 @@
                                     </div>
                                 </nav>
                             </div>
+                            <!-- Arch selector -->
+                            <div class="tile is-vertical is-12 is-child">
+                                <nav class="panel is-danger">
+                                    <p class="panel-heading has-text-centered">Architecture</p>
+                                    <div class="panel-block">
+                                        <div class="field has-addons">
+                                            <p class="control">
+                                                <span class="select">
+                                                    <select v-model="arch">
+                                                        <option v-for="archItem in archList" :value="archItem">{{ archItem }}</option>
+                                                    </select>
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </nav>
+                            </div>
                         </nav>
                     </div>
                 </div>
@@ -318,30 +343,22 @@
                 return `<a href="${cve[0]}">${cve[1]}</a>`;
             }
 
-            function getArtifactUrl(base, build, path, legacy) {
-                if (legacy) {
-                    return `${base}/${build.id}/${path}`;
-                }
-                // XXX: just return for the first arch for now; multi-arch
-                // requires reworking the page layout
-                return `${base}/${build.id}/${build.arches[0]}/${path}`;
-            }
-
-            function createArtifactLink(base, build, path, legacy) {
-                var url = getArtifactUrl(base, build, path, legacy);
-                return `<a href="${url}">${path}</a>`;
+            function getArtifactUrl(base, build, arch, path) {
+                return `${base}/${build.id}/${arch}/${path}`;
             }
 
             function fetchBuilds(base) {
                 return fetch(`${base}/builds.json`)
                     .then(response => response.ok ? response.json() : {"builds": []})
                     .then(data => {
-                        if (!('schema-version' in data) || data["schema-version"] != "1.0.0") {
-                            // in legacy mode, just assume we only built x86_64
-                            return [true, data.builds.map(id => ({'id': id, 'arches': ['x86_64'], 'meta': null, 'commitmeta': null}))];
-                        } else {
-                            return [false, data.builds.map(build => ({'id': build.id, 'arches': build.arches, 'meta': null, 'commitmeta': null}))];
-                        }
+                            return data.builds.map(build => ({
+                                'id': build.id,
+                                'arches': build.arches,
+                                'meta': null,
+                                'metas': {},
+                                'commitmeta': null,
+                                'commitmetas': {},
+                            }));
                     });
             }
 
@@ -364,42 +381,42 @@
                 return r;
             }
 
-            function fetchBuild(base, build, legacy) {
-                fetchBuildMeta(base, build, legacy).then(result => {
-                    [basearch, meta] = result;
+            function fetchBuild(base, build, arch) {
+                // is that arch even available for this build?
+                if (!build.arches.includes(arch)) {
+                    build.meta = null;
+                    build.commitmeta = null;
+                    return;
+                }
+                // did we fetch it already?
+                if (arch in build.commitmetas) {
+                    build.meta = build.metas[arch];
+                    build.commitmeta = build.commitmetas[arch];
+                    return;
+                }
+                // fetch it
+                fetchBuildMeta(base, build, arch).then(meta => {
                     sortPkgDiff(meta);
                     // show the build metadata
                     build.meta = meta;
+                    build.metas[arch] = meta;
                     // and fetch extra commit metadata in async
-                    fetchBuildCommitMeta(base, build, basearch, legacy).then(commitmeta => {
+                    fetchBuildCommitMeta(base, build, arch).then(commitmeta => {
                         commitmeta["importantPkgs"] = findImportantPkgs(commitmeta);
                         commitmeta["showImportantPkgsOnly"] = true;
                         build.commitmeta = commitmeta;
+                        build.commitmetas[arch] = commitmeta;
                     });
                 });
             }
 
-            function fetchBuildMeta(base, build, legacy) {
-                if (legacy) {
-                    return fetch(`${base}/${build.id}/meta.json`)
-                        .then(response => Promise.all([build.arches[0], response.ok ? response.json() : {}]));
-                }
-                // XXX: just fetch the meta for the first arch right now
-                return fetch(`${base}/${build.id}/${build.arches[0]}/meta.json`)
-                    .then(response => Promise.all([build.arches[0], response.ok ? response.json() : {}]));
-
-                // return Promise.all(build.arches.map(arch => {
-                //     fetch(`${base}/${build.id}/${arch}/meta.json`)
-                //         .then(response => Promise.all([arch, response.ok ? response.json() : {}]));
-                // }));
+            function fetchBuildMeta(base, build, arch) {
+                return fetch(`${base}/${build.id}/${arch}/meta.json`)
+                    .then(response => response.ok ? response.json() : {});
             }
 
-            function fetchBuildCommitMeta(base, build, basearch, legacy) {
-                if (legacy) {
-                    return fetch(`${base}/${build.id}/commitmeta.json`)
-                        .then(response => response.ok ? response.json() : {});
-                }
-                return fetch(`${base}/${build.id}/${basearch}/commitmeta.json`)
+            function fetchBuildCommitMeta(base, build, arch) {
+                return fetch(`${base}/${build.id}/${arch}/commitmeta.json`)
                     .then(response => response.ok ? response.json() : {});
             }
 
@@ -410,21 +427,19 @@
             var app = new Vue({
                 el: '#app',
                 data: {
-                    // source of truth for streams
+                    // source of truth for streams; ideally this would come from some higher-level source of truth
                     streamList: ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates', 'developer'],
+                    // source of truth for arches; ideally this would come from aggregating builds.json
+                    archList: ['x86_64', 'aarch64'],
                     // currently selected stream
                     stream: 'testing-devel',
+                    // currently selected architecture
+                    arch: 'x86_64',
                     // if current stream is "developer", currently entered developer
                     developer: "",
                     // current url to builds/ dir for stream
                     buildsUrl: "",
-                    // whether the currently selected stream has a legacy layout
-                    // https://github.com/coreos/coreos-assembler/pull/580
-                    legacy: false,
                     // list of {id, arches, meta, commitmeta} build objects
-                    // XXX: in non-legacy mode, meta and commitmeta are those
-                    // of the first arch, but in the future these would be e.g.
-                    // meta[arch] and commitmeta[arch]
                     builds: [],
                     // list of unshown {id, arches, meta, commitmeta} build objects
                     unshown_builds: [],
@@ -433,14 +448,27 @@
                 },
                 created: function() {
                     let searchParams = new URLSearchParams(window.location.search);
+                    let updateHistory = false;
                     if (searchParams.has('stream')) {
                         const queryStream = searchParams.get('stream');
                         if (this.streamList.includes(queryStream)) {
                             this.stream = queryStream;
                         } else {
                             searchParams.set('stream', this.stream);
-                            history.replaceState(null, null, `${window.location.origin + window.location.pathname}?${searchParams.toString()}`);
+                            updateHistory = true;
                         }
+                    }
+                    if (searchParams.has('arch')) {
+                        const queryArch = searchParams.get('arch');
+                        if (this.archList.includes(queryArch)) {
+                            this.arch = queryArch;
+                        } else {
+                            searchParams.set('arch', this.arch);
+                            updateHistory = true;
+                        }
+                    }
+                    if (updateHistory) {
+                        history.replaceState(null, null, `${window.location.origin + window.location.pathname}?${searchParams.toString()}`);
                     }
 
                     this.refreshBuilds();
@@ -449,20 +477,22 @@
                     stream() {
                         this.updateURL();
                         this.refreshBuilds();
+                    },
+                    arch() {
+                        this.updateURL();
+                        this.refreshArch();
                     }
                 },
                 methods: {
                     updateURL: function() {
-                        history.replaceState(null, null, `${window.location.origin + window.location.pathname}?stream=${this.stream}`);
+                        history.replaceState(null, null, `${window.location.origin + window.location.pathname}?stream=${this.stream}&arch=${this.arch}`);
                     },
                     refreshBuilds: function() {
                         this.loading = true
                         this.buildsUrl = getBaseUrl(this.stream, this.developer) + "/builds"
-                        fetchBuilds(this.buildsUrl).then(result => {
-                            [legacy, builds] = result;
+                        fetchBuilds(this.buildsUrl).then(builds => {
                             // first populate and show the build list
                             this.loading = false;
-                            this.legacy = legacy;
                             this.builds = [];
                             this.unshown_builds = [];
 
@@ -470,11 +500,16 @@
                             builds.forEach((build, idx) => {
                                 if (idx < initialBuildsShown) {
                                     this.builds.push(build);
-                                    fetchBuild(this.buildsUrl, build, this.legacy);
+                                    fetchBuild(this.buildsUrl, build, this.arch);
                                 } else {
                                     this.unshown_builds.push(build);
                                 }
                             })
+                        });
+                    },
+                    refreshArch: function() {
+                        this.builds.forEach((build, idx) => {
+                            fetchBuild(this.buildsUrl, build, this.arch);
                         });
                     },
                     loadMoreBuilds: function(n) {
@@ -483,7 +518,7 @@
                         unshown_builds.forEach((build, idx) => {
                             if (n < 0 || idx < n) {
                                 this.builds.push(build);
-                                fetchBuild(this.buildsUrl, build, this.legacy);
+                                fetchBuild(this.buildsUrl, build, this.arch);
                             } else {
                                 this.unshown_builds.push(build);
                             }
@@ -491,23 +526,20 @@
                     },
                     getImageUrl: function(build, type) {
                         var path = build.meta['images'][type]['path'];
-                        var url = getArtifactUrl(this.buildsUrl, build, path, this.legacy);
+                        var url = getArtifactUrl(this.buildsUrl, build, this.arch, path);
                         return `<a href="${url}">${path}</a> ` +
                             `(<a title="Copy image link to clipboard" class="js"
                                  onclick="copyToClipboard('${url}')">copy link</a>)`;
                     },
                     getObjectUrl: function(build, path) {
-                        return getArtifactUrl(this.buildsUrl, build, path, this.legacy);
+                        return getArtifactUrl(this.buildsUrl, build, this.arch, path);
                     },
                     getOSTreeUrl: function(build) {
                         if ('ostree' in build.meta['images']) {
                             var path = build.meta['images']['ostree']['path'];
-                            return getArtifactUrl(this.buildsUrl, build, path, this.legacy)
+                            return getArtifactUrl(this.buildsUrl, build, this.arch, path);
                         }
                         return this.getObjectUrl(build, "ostree-commit.tar")
-                    },
-                    getObjectLink: function(build, path) {
-                        return createArtifactLink(this.buildsUrl, build, path, this.legacy);
                     },
                     getPkgNevra: function(tuple) {
                         return `${tuple[0]}-${tuple[1]}.${tuple[2]}`;
