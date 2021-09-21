@@ -177,10 +177,10 @@ function templateUrl() {
 
 // Add all nodes.
 function addNodes(graph, updates) {
+  cur_index = 0;
   updates["nodes"].forEach(function(node) {
     pageStreamDetails["nodes"] += 1;
     var kind = "common"
-    const index = node["metadata"]["org.fedoraproject.coreos.releases.age_index"];
     const version = node["version"];
     if (node["metadata"]["org.fedoraproject.coreos.updates.deadend"] === "true") {
       kind += " deadend";
@@ -198,9 +198,10 @@ function addNodes(graph, updates) {
       "label": version,
       "class": kind,
     };
-    graph.setNode(index, props);
-    var nodeBox = graph.node(index);
+    graph.setNode(cur_index, props);
+    var nodeBox = graph.node(cur_index);
     nodeBox.rx = nodeBox.ry = 5;
+    cur_index += 1;
   });
   return updates;
 }
