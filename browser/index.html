@@ -217,6 +217,14 @@
                                                     </li>
                                                 </ul>
                                             </div>
+                                            <div v-if="'gcp' in build.meta" class="content">
+                                                GCP:
+                                                <ul>
+                                                    <li>Project: {{ build.meta.gcp.project }}</li>
+                                                    <li>Family: {{ build.meta.gcp.family }}</li>
+                                                    <li>Image: {{ build.meta.gcp.image }}</li>
+                                                </ul>
+                                            </div>
                                             <hr>
                                         </div>
                                         <div v-else-if="!build.arches.includes(arch)" style="margin-left: 1em">
