@@ -187,6 +187,9 @@
                                                     <li v-if="'live-rootfs' in build.meta.images">
                                                         Live Rootfs: <span v-html="getImageUrl(build, 'live-rootfs')"></span>
                                                     </li>
+                                                    <li v-if="'nutanix' in build.meta.images">
+                                                        Nutanix: <span v-html="getImageUrl(build, 'nutanix')"></span>
+                                                    </li>
                                                     <li v-if="'openstack' in build.meta.images">
                                                         OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
                                                     </li>
