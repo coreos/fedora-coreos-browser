@@ -196,6 +196,9 @@
                                                     <li v-if="'qemu' in build.meta.images">
                                                         QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
                                                     </li>
+                                                    <li v-if="'virtualbox' in build.meta.images">
+                                                        VirtualBox: <span v-html="getImageUrl(build, 'virtualbox')"></span>
+                                                    </li>
                                                     <li v-if="'vmware' in build.meta.images">
                                                         VMware: <span v-html="getImageUrl(build, 'vmware')"></span>
                                                     </li>
