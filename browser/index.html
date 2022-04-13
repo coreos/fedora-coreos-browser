@@ -175,6 +175,9 @@
                                                     <li v-if="'initramfs' in build.meta.images">
                                                         Installer Initramfs: <span v-html="getImageUrl(build, 'initramfs')"></span>
                                                     </li>
+                                                    <li v-if="'kubevirt' in build.meta.images">
+                                                        KubeVirt: <span v-html="getImageUrl(build, 'kubevirt')"></span>
+                                                    </li>
                                                     <li v-if="'live-iso' in build.meta.images">
                                                         Live ISO: <span v-html="getImageUrl(build, 'live-iso')"></span>
                                                     </li>
