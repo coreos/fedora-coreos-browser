@@ -10,7 +10,7 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
         <style>a.js {cursor: pointer; color: blue; text-decoration: underline;}</style>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
-        <title>Fedora CoreOS Build Browser</title>
+        <title>Red Hat CoreOS Build Browser</title>
     </head>
     <body>
         <!-- Navbar -->
@@ -45,7 +45,7 @@
                                             <div class="content">
                                                 Metadata:
                                                 <ul>
-                                                    <li> FCOS Commit: <a v-bind:href="'https://github.com/coreos/fedora-coreos-config/commit/' + build.meta['coreos-assembler.config-gitrev']">{{ build.meta['coreos-assembler.config-gitrev'] }}</a></li>
+                                                    <li> OS Commit: <a v-bind:href="'https://github.com/openshift/os/commit/' + build.meta['coreos-assembler.config-gitrev']">{{ build.meta['coreos-assembler.config-gitrev'] }}</a></li>
                                                     <li> COSA Commit: <a v-bind:href="'https://github.com/coreos/coreos-assembler/commit/' + build.meta['coreos-assembler.container-image-git']['commit']">{{ build.meta['coreos-assembler.container-image-git']['commit'] }}</a></li>
                                                     <li> Raw: <a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a> <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a></li>
                                                 </ul>
@@ -334,8 +334,8 @@
             //const baseProdUrl = 'https://s3.amazonaws.com/fcos-builds/prod/streams'
             //const baseDevelUrl = 'https://s3.amazonaws.com/fcos-builds/devel/streams'
 
-            const baseProdUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
-            const baseDevelUrl = 'https://builds.coreos.fedoraproject.org/devel/streams'
+            const baseProdUrl = 'https://s3.amazonaws.com/BUCKET/prod/streams'
+            const baseDevelUrl = 'https://s3.amazonaws.com/BUCKET/devel/streams'
 
             const initialBuildsShown = 5;
 
@@ -445,11 +445,11 @@
                 el: '#app',
                 data: {
                     // source of truth for streams; ideally this would come from some higher-level source of truth
-                    streamList: ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates', 'developer'],
+                    streamList: ['4.13', '4.12', '4.11', '4.10', '4.9', '4.8', '4.7', '4.6'],
                     // source of truth for arches; ideally this would come from aggregating builds.json
                     archList: ['x86_64', 'aarch64', 'ppc64le', 's390x'],
                     // currently selected stream
-                    stream: 'testing-devel',
+                    stream: '4.13',
                     // currently selected architecture
                     arch: 'x86_64',
                     // if current stream is "developer", currently entered developer
