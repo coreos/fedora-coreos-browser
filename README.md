@@ -7,11 +7,14 @@ This repository contains the source for several standalone HTML pages, which are
 
 ## Deploying
 
-Right now, it's a manual process. E.g.:
+Right now, it's a manual process.
+
+First replace BUCKET in `index.html` to the bucket name,
+then run e.g.:
 
 ```sh
-aws s3 cp --profile fcos-builds-mgmt --acl=public-read \
-    browser/index.html s3://fcos-builds/browser \
+aws s3 cp --profile rhcos --acl=public-read \
+    browser/index.html s3://BUCKET/browser \
     --cache-control max-age=60
 ```
 
