@@ -196,6 +196,9 @@
                                                     <li v-if="'openstack' in build.meta.images">
                                                         OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
                                                     </li>
+                                                    <li v-if="'powervs' in build.meta.images">
+                                                        PowerVS: <span v-html="getImageUrl(build, 'powervs')"></span>
+                                                    </li>
                                                     <li v-if="'qemu' in build.meta.images">
                                                         QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
                                                     </li>
