@@ -148,17 +148,14 @@
                                                     <li v-if="'azurestack' in build.meta.images">
                                                         Azure Stack: <span v-html="getImageUrl(build, 'azurestack')"></span>
                                                     </li>
-                                                    <li v-if="'metal' in build.meta.images">
-                                                        Bare Metal: <span v-html="getImageUrl(build, 'metal')"></span>
-                                                    </li>
-                                                    <li v-if="'metal4k' in build.meta.images">
-                                                        Bare Metal (4k Native): <span v-html="getImageUrl(build, 'metal4k')"></span>
-                                                    </li>
                                                     <li v-if="'digitalocean' in build.meta.images">
                                                         DigitalOcean: <span v-html="getImageUrl(build, 'digitalocean')"></span>
                                                     </li>
                                                     <li v-if="'exoscale' in build.meta.images">
                                                         Exoscale: <span v-html="getImageUrl(build, 'exoscale')"></span>
+                                                    </li>
+                                                    <li v-if="'extensions-container' in build.meta.images">
+                                                        Extensions Container: <span v-html="getImageUrl(build, 'extensions-container')"></span>
                                                     </li>
                                                     <li v-if="'gcp' in build.meta.images">
                                                         GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
@@ -168,6 +165,9 @@
                                                     </li>
                                                     <li v-if="'kubevirt' in build.meta.images">
                                                         KubeVirt: <span v-html="getImageUrl(build, 'kubevirt')"></span>
+                                                    </li>
+                                                    <li v-if="'legacy-oscontainer' in build.meta.images">
+                                                        Legacy OSContainer: <span v-html="getImageUrl(build, 'legacy-oscontainer')"></span>
                                                     </li>
                                                     <li v-if="'live-iso' in build.meta.images">
                                                         Live ISO: <span v-html="getImageUrl(build, 'live-iso')"></span>
@@ -180,6 +180,12 @@
                                                     </li>
                                                     <li v-if="'live-rootfs' in build.meta.images">
                                                         Live Rootfs: <span v-html="getImageUrl(build, 'live-rootfs')"></span>
+                                                    </li>
+                                                    <li v-if="'metal' in build.meta.images">
+                                                        Metal: <span v-html="getImageUrl(build, 'metal')"></span>
+                                                    </li>
+                                                    <li v-if="'metal4k' in build.meta.images">
+                                                        Metal (4k Native): <span v-html="getImageUrl(build, 'metal4k')"></span>
                                                     </li>
                                                     <li v-if="'nutanix' in build.meta.images">
                                                         Nutanix: <span v-html="getImageUrl(build, 'nutanix')"></span>
@@ -201,12 +207,6 @@
                                                     </li>
                                                     <li v-if="'vultr' in build.meta.images">
                                                         Vultr: <span v-html="getImageUrl(build, 'vultr')"></span>
-                                                    </li>
-                                                    <li v-if="'extensions-container' in build.meta.images">
-                                                        Extensions Container: <span v-html="getImageUrl(build, 'extensions-container')"></span>
-                                                    </li>
-                                                    <li v-if="'legacy-oscontainer' in build.meta.images">
-                                                        Legacy OSContainer: <span v-html="getImageUrl(build, 'legacy-oscontainer')"></span>
                                                     </li>
                                                 </ul>
                                             </div>
