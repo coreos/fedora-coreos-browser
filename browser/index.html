@@ -166,15 +166,6 @@
                                                     <li v-if="'ibmcloud' in build.meta.images">
                                                         IBM Cloud: <span v-html="getImageUrl(build, 'ibmcloud')"></span>
                                                     </li>
-                                                    <li v-if="'iso' in build.meta.images">
-                                                        Installer ISO: <span v-html="getImageUrl(build, 'iso')"></span>
-                                                    </li>
-                                                    <li v-if="'kernel' in build.meta.images">
-                                                        Installer Kernel: <span v-html="getImageUrl(build, 'kernel')"></span>
-                                                    </li>
-                                                    <li v-if="'initramfs' in build.meta.images">
-                                                        Installer Initramfs: <span v-html="getImageUrl(build, 'initramfs')"></span>
-                                                    </li>
                                                     <li v-if="'kubevirt' in build.meta.images">
                                                         KubeVirt: <span v-html="getImageUrl(build, 'kubevirt')"></span>
                                                     </li>
