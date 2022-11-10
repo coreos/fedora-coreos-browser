@@ -211,6 +211,12 @@
                                                     <li v-if="'vultr' in build.meta.images">
                                                         Vultr: <span v-html="getImageUrl(build, 'vultr')"></span>
                                                     </li>
+                                                    <li v-if="'extensions-container' in build.meta.images">
+                                                        Extensions Container: <span v-html="getImageUrl(build, 'extensions-container')"></span>
+                                                    </li>
+                                                    <li v-if="'legacy-oscontainer' in build.meta.images">
+                                                        Legacy OSContainer: <span v-html="getImageUrl(build, 'legacy-oscontainer')"></span>
+                                                    </li>
                                                 </ul>
                                             </div>
                                             <div v-if="'aliyun' in build.meta" class="content">
