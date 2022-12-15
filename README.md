@@ -9,8 +9,8 @@ This repository contains the source for several standalone HTML pages, which are
 
 Right now, it's a manual process.
 
-First replace BUCKET in `index.html` to the bucket name,
-then run e.g.:
+First replace `CLOUDFRONT_URL` in `index.html` with the
+CloudFront URL, then run e.g.:
 
 ```sh
 aws s3 cp --profile rhcos --acl=public-read \
