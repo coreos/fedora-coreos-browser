@@ -50,6 +50,14 @@
                                                     <li> Raw: <a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a> <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a></li>
                                                 </ul>
                                             </div>
+                                            <div v-if="'base-oscontainer' in build.meta" class="content">
+                                                Base Container Image:
+                                                <span v-html="getClickableContainerImage(build.meta['base-oscontainer'])"></span>
+                                            </div>
+                                            <div v-if="'extensions-container' in build.meta" class="content">
+                                                Extensions Container Image:
+                                                <span v-html="getClickableContainerImage(build.meta['extensions-container'])"></span>
+                                            </div>
                                             <div class="content">
                                                 OSTree:
                                                 <ul>
@@ -540,6 +548,12 @@
                                 this.unshown_builds.push(build);
                             }
                         })
+                    },
+                    getClickableContainerImage: function(img) {
+                        var pullspec = img.image + '@' + img.digest;
+                        return `<tt>${pullspec}</tt> ` +
+                            `(<a title="Copy to clipboard" class="js"
+                                 onclick="copyToClipboard('${pullspec}')">copy link</a>)`;
                     },
                     getImageUrl: function(build, type) {
                         var path = build.meta['images'][type]['path'];
