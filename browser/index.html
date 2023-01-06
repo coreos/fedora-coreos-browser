@@ -50,17 +50,6 @@
                                                     <li> Raw: <a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a> <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a></li>
                                                 </ul>
                                             </div>
-                                            <div class="content" v-if="'base-oscontainer' in build.meta">
-                                                Base Container Image:
-                                                <ul>
-                                                    <li>
-                                                        <span v-html="getClickableContainerImage(build.meta['base-oscontainer'])"></span>
-                                                    </li>
-                                                    <li v-for="tag in build.meta['base-oscontainer'].tags">
-                                                        <span v-html="getClickableContainerImage(build.meta['base-oscontainer'], tag)"></span>
-                                                    </li>
-                                                </ul>
-                                            </div>
                                             <div class="content">
                                                 OSTree:
                                                 <ul>
@@ -69,6 +58,17 @@
                                                     </li>
                                                     <li v-if="build.meta['fedora-coreos.parent-commit']">
                                                         Parent Commit: {{ build.meta['fedora-coreos.parent-commit'] }} ({{ build.meta['fedora-coreos.parent-version'] }})
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="content" v-if="'base-oscontainer' in build.meta">
+                                                Base Container Image:
+                                                <ul>
+                                                    <li>
+                                                        <span v-html="getClickableContainerImage(build.meta['base-oscontainer'])"></span>
+                                                    </li>
+                                                    <li v-for="tag in build.meta['base-oscontainer'].tags">
+                                                        <span v-html="getClickableContainerImage(build.meta['base-oscontainer'], tag)"></span>
                                                     </li>
                                                 </ul>
                                             </div>
