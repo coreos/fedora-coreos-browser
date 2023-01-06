@@ -67,17 +67,18 @@
                                                     <li v-if="build.meta['fedora-coreos.parent-commit']">
                                                         Parent Commit: {{ build.meta['fedora-coreos.parent-commit'] }} ({{ build.meta['fedora-coreos.parent-version'] }})
                                                     </li>
-                                                    <li v-if="build.commitmeta">Packages: (<a class="js" v-on:click="build.commitmeta.showImportantPkgsOnly = !build.commitmeta.showImportantPkgsOnly">{{ build.commitmeta.showImportantPkgsOnly ? "expand" : "collapse" }}</a>)
-                                                        <ul v-if="build.commitmeta.showImportantPkgsOnly">
-                                                            <li v-for="pkg in build.commitmeta.importantPkgs">
-                                                                {{ getPkgNevraFull(pkg) }}
-                                                            </li>
-                                                        </ul>
-                                                        <ul v-else>
-                                                            <li v-for="pkg in build.commitmeta['rpmostree.rpmdb.pkglist']">
-                                                                {{ getPkgNevraFull(pkg) }}
-                                                            </li>
-                                                        </ul>
+                                                </ul>
+                                            </div>
+                                            <div class="content" v-if="build.commitmeta">
+                                                Packages: (<a class="js" v-on:click="build.commitmeta.showImportantPkgsOnly = !build.commitmeta.showImportantPkgsOnly">{{ build.commitmeta.showImportantPkgsOnly ? "expand" : "collapse" }}</a>)
+                                                <ul v-if="build.commitmeta.showImportantPkgsOnly">
+                                                    <li v-for="pkg in build.commitmeta.importantPkgs">
+                                                        {{ getPkgNevraFull(pkg) }}
+                                                    </li>
+                                                </ul>
+                                                <ul v-else>
+                                                    <li v-for="pkg in build.commitmeta['rpmostree.rpmdb.pkglist']">
+                                                        {{ getPkgNevraFull(pkg) }}
                                                     </li>
                                                 </ul>
                                             </div>
