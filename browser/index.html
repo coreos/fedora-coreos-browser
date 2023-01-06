@@ -50,13 +50,16 @@
                                                     <li> Raw: <a v-bind:href="getObjectUrl(build, 'meta.json')">meta.json</a> <a v-bind:href="getObjectUrl(build, 'commitmeta.json')">commitmeta.json</a></li>
                                                 </ul>
                                             </div>
-                                            <div v-if="'base-oscontainer' in build.meta" class="content">
+                                            <div class="content" v-if="'base-oscontainer' in build.meta">
                                                 Base Container Image:
-                                                <span v-html="getClickableContainerImage(build.meta['base-oscontainer'])"></span>
-                                            </div>
-                                            <div v-if="'extensions-container' in build.meta" class="content">
-                                                Extensions Container Image:
-                                                <span v-html="getClickableContainerImage(build.meta['extensions-container'])"></span>
+                                                <ul>
+                                                    <li>
+                                                        <span v-html="getClickableContainerImage(build.meta['base-oscontainer'])"></span>
+                                                    </li>
+                                                    <li v-for="tag in build.meta['base-oscontainer'].tags">
+                                                        <span v-html="getClickableContainerImage(build.meta['base-oscontainer'], tag)"></span>
+                                                    </li>
+                                                </ul>
                                             </div>
                                             <div class="content">
                                                 OSTree:
@@ -216,6 +219,17 @@
                                                     </li>
                                                     <li v-if="'vultr' in build.meta.images">
                                                         Vultr: <span v-html="getImageUrl(build, 'vultr')"></span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="content" v-if="'extensions-container' in build.meta">
+                                                Extensions Container Image:
+                                                <ul>
+                                                    <li>
+                                                        <span v-html="getClickableContainerImage(build.meta['extensions-container'])"></span>
+                                                    </li>
+                                                    <li v-for="tag in build.meta['extensions-container'].tags">
+                                                        <span v-html="getClickableContainerImage(build.meta['extensions-container'], tag)"></span>
                                                     </li>
                                                 </ul>
                                             </div>
@@ -550,9 +564,14 @@
                             }
                         })
                     },
-                    getClickableContainerImage: function(img) {
+                    getClickableContainerImage: function(img, tag) {
                         var pullspec = img.image + '@' + img.digest;
-                        return `<tt>${pullspec}</tt> ` +
+                        var pullspec_disp = img.image + '@' + img.digest.slice(0, "sha256:".length + 12) + '...';
+                        if (tag != undefined) {
+                            pullspec = img.image + ':' + tag;
+                            pullspec_disp = pullspec
+                        }
+                        return `${pullspec_disp} ` +
                             `(<a title="Copy to clipboard" class="js"
                                  onclick="copyToClipboard('${pullspec}')">copy link</a>)`;
                     },
