@@ -141,7 +141,7 @@
                                                     </li>
                                                 </ul>
                                             </div>
-                                            <div class="content">
+                                            <div class="content" v-if="hasNonOSTreeImages(build)">
                                                 Images:
                                                 <ul>
                                                     <li v-if="'aliyun' in build.meta.images">
@@ -583,6 +583,9 @@
                     },
                     getPkgEvra: function(tuple) {
                         return `${tuple[1]}.${tuple[2]}`;
+                    },
+                    hasNonOSTreeImages: function(build) {
+                        return Object.keys(build.meta.images).length > 1;
                     },
                     // Adapted from https://stackoverflow.com/a/6109105
                     timeSince: function(rfc3339_timestamp) {
