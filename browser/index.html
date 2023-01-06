@@ -51,11 +51,11 @@
                                                 </ul>
                                             </div>
                                             <div v-if="'base-oscontainer' in build.meta" class="content">
-                                                Base Container Image:
+                                                Base Container Image:<br>
                                                 <span v-html="getClickableContainerImage(build.meta['base-oscontainer'])"></span>
                                             </div>
                                             <div v-if="'extensions-container' in build.meta" class="content">
-                                                Extensions Container Image:
+                                                Extensions Container Image:<br>
                                                 <span v-html="getClickableContainerImage(build.meta['extensions-container'])"></span>
                                             </div>
                                             <div class="content">
