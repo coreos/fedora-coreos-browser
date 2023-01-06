@@ -233,6 +233,17 @@
                                                     </li>
                                                 </ul>
                                             </div>
+                                            <div class="content" v-if="'oscontainer' in build.meta">
+                                                Legacy Base Container Image:
+                                                <ul>
+                                                    <li>
+                                                        <span v-html="getClickableContainerImage(build.meta['oscontainer'])"></span>
+                                                    </li>
+                                                    <li v-for="tag in build.meta['oscontainer'].tags">
+                                                        <span v-html="getClickableContainerImage(build.meta['oscontainer'], tag)"></span>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                             <div v-if="'aliyun' in build.meta" class="content">
                                                 Aliyun (Alibaba Cloud) Images:
                                                 <ul>
