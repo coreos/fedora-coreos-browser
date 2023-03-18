@@ -579,8 +579,17 @@
                         })
                     },
                     getClickableContainerImage: function(img, tag) {
-                        var pullspec = img.image + '@' + img.digest;
-                        var pullspec_disp = img.image + '@' + img.digest.slice(0, "sha256:".length + 12) + '...';
+                        var pullspec = img.image;
+                        var pullspec_disp = img.image;
+                        if (img.digest !== undefined) {
+                            pullspec += '@' + img.digest;
+                            pullspec_disp += '@' + img.digest.slice(0, "sha256:".length + 12) + '...';
+                        } else {
+                            var index = pullspec.indexOf('@sha256:');
+                            if (index != -1) {
+                                pullspec_disp = pullspec.slice(0, index + 20) + '...';
+                            }
+                        }
                         if (tag !== undefined) {
                             pullspec = img.image + ':' + tag;
                             pullspec_disp = pullspec
