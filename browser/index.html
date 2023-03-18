@@ -581,7 +581,7 @@
                     getClickableContainerImage: function(img, tag) {
                         var pullspec = img.image + '@' + img.digest;
                         var pullspec_disp = img.image + '@' + img.digest.slice(0, "sha256:".length + 12) + '...';
-                        if (tag != undefined) {
+                        if (tag !== undefined) {
                             pullspec = img.image + ':' + tag;
                             pullspec_disp = pullspec
                         }
