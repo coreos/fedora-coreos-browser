@@ -214,6 +214,9 @@
                                                     <li v-if="'qemu-secex' in build.meta.images">
                                                         QEMU Secure Execution: <span v-html="getImageUrl(build, 'qemu-secex')"></span>
                                                     </li>
+                                                    <li v-if="'ignition-gpg-key' in build.meta.images">
+                                                        QEMU Secure Execution Ignition PubKey: <span v-html="getImageUrl(build, 'ignition-gpg-key')"></span>
+                                                    </li>
                                                     <li v-if="'virtualbox' in build.meta.images">
                                                         VirtualBox: <span v-html="getImageUrl(build, 'virtualbox')"></span>
                                                     </li>
