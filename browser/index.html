@@ -151,6 +151,9 @@
                                                     <li v-if="'aliyun' in build.meta.images">
                                                         Aliyun (Alibaba Cloud): <span v-html="getImageUrl(build, 'aliyun')"></span>
                                                     </li>
+                                                    <li v-if="'applehv' in build.meta.images">
+                                                        Apple Hypervisor: <span v-html="getImageUrl(build, 'applehv')"></span>
+                                                    </li>
                                                     <li v-if="'aws' in build.meta.images">
                                                         AWS: <span v-html="getImageUrl(build, 'aws')"></span>
                                                     </li>
