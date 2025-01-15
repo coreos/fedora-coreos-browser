@@ -59,7 +59,7 @@ function zeroStream() {
 <!-- Navbar -->
 <nav class="navbar is-light" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="."><img src="https://getfedora.org/static/images/fedora-coreos-logo.png"/></a>
+    <a class="navbar-item" href="."><img src="https://fedoraproject.org/assets/images/coreos-logo-light.png"/></a>
   </div>
 
   <div class="navbar-end">
@@ -171,7 +171,12 @@ function templateUrl() {
   }
   pageInfra = infra;
 
-  const updatesUrl = `https://raw-updates.coreos.${infraPrefix}fedoraproject.org/v1/graph?basearch=${basearch}&stream=${stream}`;
+  var oci = urlParams.get('oci');
+  if (oci === null) {
+    oci = false;
+  }
+
+  const updatesUrl = `https://raw-updates.coreos.${infraPrefix}fedoraproject.org/v1/graph?basearch=${basearch}&stream=${stream}&oci=${oci}`;
   return updatesUrl;
 }
 
