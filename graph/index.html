@@ -59,15 +59,16 @@ function zeroStream() {
 <!-- Navbar -->
 <nav class="navbar is-light" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="."><img src="https://fedoraproject.org/assets/images/coreos-logo-light.png"/></a>
+    <a class="navbar-item" href="https://builds.coreos.fedoraproject.org/graph?stream=stable&basearch=x86_64"><img src="https://fedoraproject.org/assets/images/coreos-logo-light.png"/></a>
   </div>
 
   <div class="navbar-end">
     <div class="navbar-item has-dropdown is-hoverable">
-      <a class="navbar-link">Stream</a>
+      <a class="navbar-link" onclick="handleStreamClick()">Stream</a>
       <div class="navbar-dropdown">
-        <a class="navbar-item">Stable</a>
-        <a class="navbar-item">Testing</a>
+        <a class="navbar-item" onclick="handleStreamDropdown('stable')">Stable</a>
+        <a class="navbar-item" onclick="handleStreamDropdown('testing')">Testing</a>
+        <a class="navbar-item" onclick="handleStreamDropdown('next')">Next</a>
       </div>
     </div>
     <div class="navbar-item has-dropdown is-hoverable">
@@ -80,7 +81,7 @@ function zeroStream() {
       <a class="navbar-link">Infrastructure</a>
       <div class="navbar-dropdown">
         <a class="navbar-item">Production</a>
-        <a class="navbar-item">Staging</a>
+        <!-- <a class="navbar-item">Staging</a> -> Removing / unavaialbe -->
       </div>
     </div>
   </div>
@@ -146,6 +147,33 @@ function zeroStream() {
 </body>
 
 <script id="js">
+let selectedStream = 'stable'; // default
+
+function handleStreamDropdown(stream) {
+  selectedStream = stream;
+}
+
+document.querySelectorAll('.navbar-item.has-dropdown a').forEach(item => {
+  item.addEventListener('click', function () {
+    const optionType = this.parentElement.previousElementSibling.textContent; // Stream/Arch/Infra
+    const optionValue = this.textContent;
+
+    switch (optionType) {
+      case 'Stream':
+        if (['stable', 'testing', 'next'].includes(optionValue)) {
+          selectedStream = optionValue;
+        }
+        break;
+    }
+
+    navigateToLink();
+  });
+});
+
+function navigateToLink() {
+  const url = `https://builds.coreos.fedoraproject.org/graph?stream=${selectedStream}&basearch=x86_64&infra=prod`;
+  window.location.href = url; // executes the above and goes to the URL
+}
 // Return Cincinnati URL.
 function templateUrl() {
   const urlParams = new URLSearchParams(window.location.search);
