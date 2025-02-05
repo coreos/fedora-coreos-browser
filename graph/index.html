@@ -59,7 +59,7 @@ function zeroStream() {
 <!-- Navbar -->
 <nav class="navbar is-light" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
-    <a class="navbar-item" href="https://builds.coreos.fedoraproject.org/graph?stream=stable&basearch=x86_64"><img src="https://fedoraproject.org/assets/images/coreos-logo-light.png"/></a>
+    <a class="navbar-item" href="?stream=stable&basearch=x86_64"><img src="https://fedoraproject.org/assets/images/coreos-logo-light.png"/></a>
   </div>
 
   <div class="navbar-end">
@@ -74,14 +74,10 @@ function zeroStream() {
     <div class="navbar-item has-dropdown is-hoverable">
       <a class="navbar-link">Architecture</a>
       <div class="navbar-dropdown">
-        <a class="navbar-item">x86_64</a>
-      </div>
-    </div>
-    <div class="navbar-item has-dropdown is-hoverable">
-      <a class="navbar-link">Infrastructure</a>
-      <div class="navbar-dropdown">
-        <a class="navbar-item">Production</a>
-        <!-- <a class="navbar-item">Staging</a> -> Removing / unavaialbe -->
+        <a class="navbar-item" onclick="handleArchDropdown('aarch64')">aarch64</a>
+        <a class="navbar-item" onclick="handleArchDropdown('ppc64le')">ppc64le</a>
+        <a class="navbar-item" onclick="handleArchDropdown('s390x')">s390x</a>
+        <a class="navbar-item" onclick="handleArchDropdown('x86_64')">x86_64</a>
       </div>
     </div>
   </div>
@@ -148,9 +144,12 @@ function zeroStream() {
 
 <script id="js">
 let selectedStream = 'stable'; // default
-
+let selectedArch = 'x86_64'; // default
 function handleStreamDropdown(stream) {
   selectedStream = stream;
+}
+function handleArchDropdown(arch) {
+  selectedArch = arch;
 }
 
 document.querySelectorAll('.navbar-item.has-dropdown a').forEach(item => {
@@ -164,6 +163,11 @@ document.querySelectorAll('.navbar-item.has-dropdown a').forEach(item => {
           selectedStream = optionValue;
         }
         break;
+      case 'Arch':
+        if (['aarch64', 'ppc64le', 's390x', 'x86_64'].includes(optionValue)) {
+          selectedArch = optionValue;
+        }
+      break;
     }
 
     navigateToLink();
@@ -171,7 +175,7 @@ document.querySelectorAll('.navbar-item.has-dropdown a').forEach(item => {
 });
 
 function navigateToLink() {
-  const url = `https://builds.coreos.fedoraproject.org/graph?stream=${selectedStream}&basearch=x86_64&infra=prod`;
+  const url = `?stream=${selectedStream}&basearch=${selectedArch}&infra=prod`;
   window.location.href = url; // executes the above and goes to the URL
 }
 // Return Cincinnati URL.
