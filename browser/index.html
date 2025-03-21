@@ -217,6 +217,9 @@
                                                     <li v-if="'powervs' in build.meta.images">
                                                         PowerVS: <span v-html="getImageUrl(build, 'powervs')"></span>
                                                     </li>
+                                                    <li v-if="'proxmoxve' in build.meta.images">
+                                                        Proxmox VE: <span v-html="getImageUrl(build, 'proxmoxve')"></span>
+                                                    </li>
                                                     <li v-if="'qemu' in build.meta.images">
                                                         QEMU: <span v-html="getImageUrl(build, 'qemu')"></span>
                                                     </li>
