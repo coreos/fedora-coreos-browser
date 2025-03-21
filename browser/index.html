@@ -175,6 +175,9 @@
                                                     <li v-if="'gcp' in build.meta.images">
                                                         GCP: <span v-html="getImageUrl(build, 'gcp')"></span>
                                                     </li>
+                                                    <li v-if="'hetzner' in build.meta.images">
+                                                        Hetzner: <span v-html="getImageUrl(build, 'hetzner')"></span>
+                                                    </li>
                                                     <li v-if="'hyperv' in build.meta.images">
                                                         Hyper-V: <span v-html="getImageUrl(build, 'hyperv')"></span>
                                                     </li>
