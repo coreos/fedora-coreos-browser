@@ -45,8 +45,8 @@
                                             <div class="content">
                                                 Metadata:
                                                 <ul>
-                                                    <li v-if="build.meta['coreos-assembler.config-gitrev']">
-                                                        FCOS Commit: <a v-bind:href="'https://github.com/coreos/fedora-coreos-config/commit/' + build.meta['coreos-assembler.config-gitrev']">{{ build.meta['coreos-assembler.config-gitrev'] }}</a>
+                                                    <li v-if="build.meta['coreos-assembler.container-config-git']">
+                                                        FCOS Commit: <a v-bind:href="'https://github.com/coreos/fedora-coreos-config/commit/' + build.meta['coreos-assembler.container-config-git']['commit']">{{ build.meta['coreos-assembler.container-config-git']['commit'] }}</a>
                                                     </li>
                                                     <li v-if="build.meta['coreos-assembler.container-image-git']">
                                                         COSA Commit: <a v-bind:href="'https://github.com/coreos/coreos-assembler/commit/' + build.meta['coreos-assembler.container-image-git']['commit']">{{ build.meta['coreos-assembler.container-image-git']['commit'] }}</a>
