@@ -205,7 +205,7 @@ function templateUrl() {
 
   var oci = urlParams.get('oci');
   if (oci === null) {
-    oci = false;
+    oci = true;
   }
 
   const updatesUrl = `https://raw-updates.coreos.${infraPrefix}fedoraproject.org/v1/graph?basearch=${basearch}&stream=${stream}&oci=${oci}`;
