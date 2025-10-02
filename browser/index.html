@@ -60,8 +60,8 @@
                                                     <li>Commit: {{ build.meta['ostree-commit'] }}
                                                         (<a v-bind:href="getOSTreeUrl(build)">download</a>)
                                                     </li>
-                                                    <li v-if="build.meta['fedora-coreos.parent-commit']">
-                                                        Parent Commit: {{ build.meta['fedora-coreos.parent-commit'] }} ({{ build.meta['fedora-coreos.parent-version'] }})
+                                                    <li v-if="build.meta['fedora-coreos.parent-version']">
+                                                        Parent Version: {{ build.meta['fedora-coreos.parent-version'] }}
                                                     </li>
                                                 </ul>
                                             </div>
