@@ -356,7 +356,6 @@
                                                         <option v-for="streamItem in streamList" :value="streamItem">{{ streamItem }}</option>
                                                     </select>
                                                 </span>
-                                                <input v-model="developer" v-if="stream == 'developer'">
                                             </p>
                                             <p class="control">
                                                 <button class="button is-light" v-on:click="refreshBuilds">Refresh</button>
@@ -390,14 +389,11 @@
         </section>
         <script>
             // PROD:
-            //const baseProdUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
-            //const baseDevelUrl = 'https://builds.coreos.fedoraproject.org/devel/streams'
+            //const baseUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
             // DEVEL:
-            //const baseProdUrl = 'https://s3.amazonaws.com/fcos-builds/prod/streams'
-            //const baseDevelUrl = 'https://s3.amazonaws.com/fcos-builds/devel/streams'
+            //const baseUrl = 'https://s3.amazonaws.com/fcos-builds/prod/streams'
 
-            const baseProdUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
-            const baseDevelUrl = 'https://builds.coreos.fedoraproject.org/devel/streams'
+            const baseUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
 
             const initialBuildsShown = 5;
 
@@ -408,10 +404,8 @@
             // RpmOstreeAdvisorySeverity enum to str
             const advisorySeverityType = ["none", "low", "moderate", "important", "critical"];
 
-            function getBaseUrl(stream, developer) {
-                return stream != "developer"
-                    ? `${baseProdUrl}/${stream}`
-                    : `${baseDevelUrl}/${developer}`;
+            function getBaseUrl(stream) {
+                return `${baseUrl}/${stream}`;
             }
 
             function createAdvisoryUrl(id) {
@@ -507,15 +501,13 @@
                 el: '#app',
                 data: {
                     // source of truth for streams; ideally this would come from some higher-level source of truth
-                    streamList: ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates', 'developer'],
+                    streamList: ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates'],
                     // source of truth for arches; ideally this would come from aggregating builds.json
                     archList: ['x86_64', 'aarch64', 'ppc64le', 's390x'],
                     // currently selected stream
                     stream: 'testing-devel',
                     // currently selected architecture
                     arch: 'x86_64',
-                    // if current stream is "developer", currently entered developer
-                    developer: "",
                     // current url to builds/ dir for stream
                     buildsUrl: "",
                     // list of {id, arches, meta, commitmeta} build objects
@@ -568,7 +560,7 @@
                     },
                     refreshBuilds: function() {
                         this.loading = true
-                        this.buildsUrl = getBaseUrl(this.stream, this.developer) + "/builds"
+                        this.buildsUrl = getBaseUrl(this.stream) + "/builds"
                         fetchBuilds(this.buildsUrl).then(builds => {
                             // first populate and show the build list
                             this.loading = false;
