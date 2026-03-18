@@ -388,12 +388,19 @@
             </div>
         </section>
         <script>
-            // PROD:
-            //const baseUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
-            // DEVEL:
-            //const baseUrl = 'https://s3.amazonaws.com/fcos-builds/prod/streams'
+            // We default to trying to pick up builds info relative to
+            // the URL where the browser index.html is accessed, but if
+            // we can't find any builds we'll fallback to the prod FCOS
+            // location.
+            //
+            // For dev purposes some useful URLs here:
+            // - https://builds.coreos.fedoraproject.org/prod/streams
+            // - https://s3.amazonaws.com/fcos-builds/prod/streams
+            const defaultUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
 
-            const baseUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
+            // List of streams for FCOS and EL (RHEL/CentOS) CoreOS
+            const FedoraCoreOSStreamList = ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates']
+            const ELCoreOSStreamList = ['4.12', '4.13-9.2', '4.14-9.2', '4.15-9.2', '4.16-9.4', '4.17-9.4', '4.18-9.4', 'c9s', 'c10s', 'rhel-9.6', 'rhel-9.8', 'rhel-10.1', 'rhel-10.2', 'rhel-9.6-te-preview']
 
             const initialBuildsShown = 5;
 
@@ -404,8 +411,51 @@
             // RpmOstreeAdvisorySeverity enum to str
             const advisorySeverityType = ["none", "low", "moderate", "important", "critical"];
 
-            function getBaseUrl(stream) {
-                return `${baseUrl}/${stream}`;
+            // Detect the base URL and stream list based on the hostname
+            // the user used to access the browser. Returns a Promise
+            // that resolves to { baseUrl, streams }.
+            async function detectDefaults() {
+                let path;
+                let streams;
+
+                // Try to select a stream list based on the URL we were accessed at.
+                if (window.location.hostname.endsWith('.redhat.com')) {
+                    streams = ELCoreOSStreamList;
+                } else {
+                    streams = FedoraCoreOSStreamList;
+                }
+
+                path = window.location.pathname.replace(/\/+$/, '');
+                // It's common for the `index.html` file to be renamed to `browser`
+                // and sit in the root directory of `builds` output. Trim trailing
+                // `/browser` (or `/browser/`) from the pathname.
+                path = path.replace(/\/browser\/?$/, '');
+                // Similar for `index.html`
+                path = path.replace(/\/index\.html\/?$/, '');
+                // Remove any trailing slash for consistency
+                path = path.replace(/\/+$/, '');
+                // Typically builds are stored under /prod/streams/<stream>
+                path = path + '/prod/streams'
+
+                // Sanity check: can we actually fetch builds from this location?
+                const testUrl = `${window.location.origin}${path}/${streams[0]}/builds/builds.json`;
+                try {
+                    const response = await fetch(testUrl);
+                    if (response.ok) {
+                        return {
+                            baseUrl: `${window.location.origin}${path}`,
+                            streams: streams
+                        };
+                    }
+                } catch (e) {
+                    // fetch failed (e.g. network error, CORS) -- fall through to fallback
+                }
+
+                // Fallback to the default URL since no builds found relative to the URL where the browser was found
+                return {
+                    baseUrl: defaultUrl,
+                    streams: FedoraCoreOSStreamList
+                };
             }
 
             function createAdvisoryUrl(id) {
@@ -500,14 +550,16 @@
             var app = new Vue({
                 el: '#app',
                 data: {
-                    // source of truth for streams; ideally this would come from some higher-level source of truth
-                    streamList: ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates'],
+                    // which streams should we show as options?
+                    streamList: [],
                     // source of truth for arches; ideally this would come from aggregating builds.json
                     archList: ['x86_64', 'aarch64', 'ppc64le', 's390x'],
                     // currently selected stream
-                    stream: 'testing-devel',
+                    stream: "",
                     // currently selected architecture
                     arch: 'x86_64',
+                    // base url for browsing builds from various streams
+                    baseUrl: "",
                     // current url to builds/ dir for stream
                     buildsUrl: "",
                     // list of {id, arches, meta, commitmeta} build objects
@@ -515,9 +567,18 @@
                     // list of unshown {id, arches, meta, commitmeta} build objects
                     unshown_builds: [],
                     // toggles "Loading..."
-                    loading: false
+                    loading: false,
+                    // suppress watchers during initial setup
+                    initializing: true
                 },
-                created: function() {
+                created: async function() {
+                    // Detect base URL and stream list from the current hostname
+                    const defaults = await detectDefaults();
+                    this.baseUrl = defaults.baseUrl;
+                    this.streamList = defaults.streams;
+                    this.stream = this.streamList[0];
+
+                    // Apply any query parameter overrides
                     let searchParams = new URLSearchParams(window.location.search);
                     let updateHistory = false;
                     if (searchParams.has('stream')) {
@@ -542,14 +603,18 @@
                         history.replaceState(null, null, `${window.location.origin + window.location.pathname}?${searchParams.toString()}`);
                     }
 
+                    // Done initializing -- allow watchers to fire from now on
+                    this.initializing = false;
                     this.refreshBuilds();
                     },
                 watch: {
                     stream() {
+                        if (this.initializing) return;
                         this.updateURL();
                         this.refreshBuilds();
                     },
                     arch() {
+                        if (this.initializing) return;
                         this.updateURL();
                         this.refreshArch();
                     }
@@ -560,7 +625,7 @@
                     },
                     refreshBuilds: function() {
                         this.loading = true
-                        this.buildsUrl = getBaseUrl(this.stream) + "/builds"
+                        this.buildsUrl = `${this.baseUrl}/${this.stream}/builds`
                         fetchBuilds(this.buildsUrl).then(builds => {
                             // first populate and show the build list
                             this.loading = false;
