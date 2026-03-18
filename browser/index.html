@@ -215,6 +215,9 @@
                                                     <li v-if="'nutanix' in build.meta.images">
                                                         Nutanix: <span v-html="getImageUrl(build, 'nutanix')"></span>
                                                     </li>
+                                                    <li v-if="'nvidiabluefield' in build.meta.images">
+                                                        NVIDIA Bluefield: <span v-html="getImageUrl(build, 'nvidiabluefield')"></span>
+                                                    </li>
                                                     <li v-if="'openstack' in build.meta.images">
                                                         OpenStack: <span v-html="getImageUrl(build, 'openstack')"></span>
                                                     </li>
