@@ -10,7 +10,7 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
         <style>a.js {cursor: pointer; color: blue; text-decoration: underline;}</style>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
-        <title>Fedora CoreOS Build Browser</title>
+        <title>CoreOS Builds Browser</title>
     </head>
     <body>
         <!-- Navbar -->
@@ -46,7 +46,7 @@
                                                 Metadata:
                                                 <ul>
                                                     <li v-if="build.meta['coreos-assembler.container-config-git']">
-                                                        FCOS Commit: <a v-bind:href="getGitUrl(build.meta['coreos-assembler.container-config-git'])">{{ build.meta['coreos-assembler.container-config-git']['commit'] }}</a>
+                                                        CoreOS Config Commit: <a v-bind:href="getGitUrl(build.meta['coreos-assembler.container-config-git'])">{{ build.meta['coreos-assembler.container-config-git']['commit'] }}</a>
                                                     </li>
                                                     <li v-if="build.meta['coreos-assembler.container-image-git']">
                                                         COSA Commit: <a v-bind:href="getGitUrl(build.meta['coreos-assembler.container-image-git'])">{{ build.meta['coreos-assembler.container-image-git']['commit'] }}</a>
@@ -333,13 +333,21 @@
                                 <nav class="panel is-danger">
                                     <p class="panel-heading has-text-centered">⚠️ Caution ⚠️</p>
                                     <div class="panel-block">
-                                        <p>
-                                        These artifacts represent output coming straight from the pipeline. They may
-                                        not function.
-                                        <br />
+                                        <!--
+                                             If we're on the Fedora CoreOS builds browser then add a note about where to get
+                                             official artifacts from our prod streams.
+                                        -->
+                                        <p v-if="window.location.href.startsWith(defaultUrl)"/>
+                                        These artifacts represent output coming straight from the pipeline and should not be
+                                        considered fully released.
+                                        <br><br>
                                         If you're looking for the latest <b>supported</b> Fedora
                                         CoreOS artifacts, please go to the
                                         <a href="https://getfedora.org/en/coreos/download/">official download page</a>.
+                                        </p>
+                                        <p v-else="window.location.href.startsWith(defaultUrl)">
+                                        These artifacts represent output coming straight from the pipeline and should not be
+                                        considered fully released.
                                         </p>
                                     </div>
                                 </nav>
