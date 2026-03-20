@@ -337,7 +337,7 @@
                                              If we're on the Fedora CoreOS builds browser then add a note about where to get
                                              official artifacts from our prod streams.
                                         -->
-                                        <p v-if="window.location.href.startsWith(defaultUrl)"/>
+                                        <p v-if="window.location.href.startsWith(defaultUrlHost)"/>
                                         These artifacts represent output coming straight from the pipeline and should not be
                                         considered fully released.
                                         <br><br>
@@ -404,7 +404,8 @@
             // For dev purposes some useful URLs here:
             // - https://builds.coreos.fedoraproject.org/prod/streams
             // - https://s3.amazonaws.com/fcos-builds/prod/streams
-            const defaultUrl = 'https://builds.coreos.fedoraproject.org/prod/streams'
+            const defaultUrlHost = 'https://builds.coreos.fedoraproject.org'
+            const defaultUrlPath = '/prod/streams'
 
             // List of streams for FCOS and EL (RHEL/CentOS) CoreOS
             const FedoraCoreOSStreamList = ['stable', 'testing', 'next', 'testing-devel', 'next-devel', 'branched', 'rawhide', 'bodhi-updates']
@@ -461,7 +462,7 @@
 
                 // Fallback to the default URL since no builds found relative to the URL where the browser was found
                 return {
-                    baseUrl: defaultUrl,
+                    baseUrl: `${defaultUrlHost}${defaultUrlPath}`,
                     streams: FedoraCoreOSStreamList
                 };
             }
